@@ -1,8 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useLiveState } from '@/lib/client/useLiveState';
-import { OfflineBadge, Scoreboard, TeamDot, btn, btnGhost, input, nameOf, teamOf, type Act } from '@/components/ui';
+import { OfflineBadge, TeamDot, btn, btnGhost, input, nameOf, teamOf, type Act } from '@/components/ui';
 import { STEP_MODULES } from '@/components/steps/registry';
+import { TeamsDashboard } from '@/components/steps/awards';
 import { STEP_KINDS, type PublicState, type StepKind } from '@/lib/types';
 
 function Login({ onDone }: { onDone: () => void }) {
@@ -70,7 +71,9 @@ function Dashboard({ state, act, offline, serverNow }: { state: PublicState; act
         </div>
       </header>
 
-      <Scoreboard teams={state.teams} />
+      <Section title="팀 구성 · 게임별 승패">
+        <TeamsDashboard state={state} />
+      </Section>
 
       <Section title={`진행 · 현재: ${cur?.title ?? '-'}`}>
         <div className="flex gap-2">

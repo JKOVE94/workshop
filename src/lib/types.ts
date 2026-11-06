@@ -1,4 +1,4 @@
-export type StepKind = 'entry' | 'roster_close' | 'hum_team' | 'amen' | 'one_voice' | 'sheep_voice' | 'part1_result';
+export type StepKind = 'entry' | 'roster_close' | 'hum_team' | 'amen' | 'one_voice' | 'sheep_voice' | 'part1_result' | 'team_board' | 'awards';
 
 export const STEP_KINDS: { kind: StepKind; label: string }[] = [
   { kind: 'entry', label: '입장' },
@@ -8,6 +8,8 @@ export const STEP_KINDS: { kind: StepKind; label: string }[] = [
   { kind: 'one_voice', label: '한마음과 한 입으로' },
   { kind: 'sheep_voice', label: '내 양은 내 음성을 들으며' },
   { kind: 'part1_result', label: '1부 결과' },
+  { kind: 'team_board', label: '팀 현황판' },
+  { kind: 'awards', label: '시상식' },
 ];
 
 export interface StepRow {
@@ -98,5 +100,7 @@ export interface PublicState {
   amen?: { matches: PubMatch[]; points: { win: number; draw: number; loss: number }; dupMode: string };
   oneVoice?: PubOneVoice;
   sheep?: PubSheep;
+  /** 게임(스텝)별 팀 득점과 우승팀 */
+  gameResults?: { stepId: string; title: string; kind: StepKind; points: Record<string, number>; winners: string[] }[];
   scoreLog?: { id: string; teamId: string; delta: number; reason: string; at: string }[];
 }

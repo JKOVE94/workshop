@@ -35,7 +35,7 @@ export function buildState(s: Snapshot, role: Role, participantId: string | null
     tiebreak: successByTeam.get(t.id) ?? 0,
     memberIds: membersOf(t.id),
   }));
-  const rankedTeams = step?.kind === 'part1_result' ? rank(teams) : teams;
+  const rankedTeams = step?.kind === 'part1_result' || step?.kind === 'awards' ? rank(teams) : teams;
 
   const me = participantId ? s.participants.find((p) => p.id === participantId) : null;
 
@@ -131,6 +131,18 @@ export function buildState(s: Snapshot, role: Role, participantId: string | null
       out.sheep.adminCards = s.cards.map((c) => ({ id: c.id, word: c.word, isTrap: c.is_trap, scanned: scanned.has(c.id) }));
     }
   }
+
+  // 게임별 득점/우승팀 (점수 기록에서 파생 — 별도 입력 불필요)
+  out.gameResults = s.steps
+    .filter((st) => s.scores.some((e) => e.step_id === st.id))
+    .map((st) => {
+      const points: Record<string, number> = {};
+      for (const t of s.teams) points[t.id] = 0;
+      for (const e of s.scores) if (e.step_id === st.id) points[e.team_id] = (points[e.team_id] ?? 0) + e.delta;
+      const max = Math.max(...Object.values(points));
+      const winners = max > 0 ? Object.keys(points).filter((k) => points[k] === max) : [];
+      return { stepId: st.id, title: st.title, kind: st.kind, points, winners };
+    });
 
   if (role === 'admin') {
     out.scoreLog = [...s.scores].reverse().slice(0, 40).map((e) => ({ id: e.id, teamId: e.team_id, delta: e.delta, reason: e.reason, at: e.created_at }));
