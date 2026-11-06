@@ -41,3 +41,49 @@ export const JOURNEY = [
   { order: 2, label: '한마음', kind: 'one_voice' },
   { order: 3, label: '인도하심', kind: 'sheep_voice' },
 ] as const;
+
+export interface GuideStep { icon: string; text: string }
+export interface Guide { title: string; steps: GuideStep[] }
+
+/** 활동 설명 (그림 위주 · 진행자가 말로 보충하므로 짧게) */
+export const GUIDES: Partial<Record<StepKind, Guide>> = {
+  hum_team: {
+    title: '허밍으로 팀 찾기',
+    steps: [
+      { icon: '📱', text: '폰에 곡 제목이 떠요' },
+      { icon: '🤫', text: '말·가사 금지! 허밍만' },
+      { icon: '🎵👂', text: '같은 곡 사람 찾기' },
+      { icon: '👥🎉', text: '모이면 팀 완성!' },
+    ],
+  },
+  amen: {
+    title: '아멘 게임',
+    steps: [
+      { icon: '🗣️', text: '“너 다니엘처럼 용감한 거 알지?” 성경 인물로 칭찬' },
+      { icon: '🙌', text: '받는 사람은 “아멘!”' },
+      { icon: '⏱️', text: '5초 안에!' },
+      { icon: '🚫', text: '같은 특성은 금지' },
+      { icon: '🏆', text: '더 많이 성공한 팀이 승리' },
+    ],
+  },
+  one_voice: {
+    title: '한마음과 한 입으로',
+    steps: [
+      { icon: '🔤', text: '한 글자씩 이어 말해요' },
+      { icon: '🧑‍🤝‍🧑➡️', text: '정해진 순서대로' },
+      { icon: '📖✨', text: '성경 단어를 완성!' },
+      { icon: '🔄', text: '시작하는 사람은 돌아가며' },
+    ],
+  },
+  sheep_voice: {
+    title: '내 양은 내 음성을 들으며',
+    steps: [
+      { icon: '🧢🐑', text: '양: 고깔모자를 앞으로 쓰고' },
+      { icon: '📢', text: '목자(팀원)가 단어를 외쳐요' },
+      { icon: '🃏', text: '테이블에서 카드를 찾아' },
+      { icon: '📷', text: '뒷면 QR을 스캔!' },
+      { icon: '⭕❌', text: '정답은 득점, 함정은 감점' },
+      { icon: '🚶', text: '걷기만! 뛰지 않기' },
+    ],
+  },
+};

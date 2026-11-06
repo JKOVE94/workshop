@@ -1,6 +1,6 @@
 import { db, must } from './supabase';
 import { loadSnapshot, seedSteps } from './repo';
-import { HUM_SONGS, TEAM_COLORS, TEAM_NAMES } from './defaults';
+import { DEFAULT_WIN_POINTS, GAME_KINDS, HUM_SONGS, TEAM_COLORS, TEAM_NAMES } from './defaults';
 import { smallestGroup, splitEvenly } from '../game/balance';
 import { leagueMatches, usedPlayers } from '../game/league';
 import { isDuplicateTrait, type DupMode } from '../game/traits';
@@ -96,6 +96,13 @@ async function patchStep(step: StepRow, patch: { config?: A; state?: A; title?: 
 }
 
 const stepOf = (snap: Snapshot, kind: StepKind): StepRow => snap.steps.find((s) => s.kind === kind) ?? fail(`'${kind}' 스텝이 없습니다`);
+
+/** 이미 지급한 승리 점수를 보정 행(음수)으로 되돌린다 (append-only 유지) */
+async function revokeWins(eventId: string, snap: Snapshot, st: StepRow) {
+  const net = new Map<string, number>();
+  for (const e of snap.scores) if (e.step_id === st.id && e.meta?.win) net.set(e.team_id, (net.get(e.team_id) ?? 0) + e.delta);
+  for (const [teamId, n] of net) await addScore(eventId, teamId, st.id, -n, `${st.title} 승리 취소`, { win: true, reversal: true });
+}
 
 async function addScore(eventId: string, teamId: string, stepId: string | null, delta: number, reason: string, meta: A = {}) {
   if (!delta) return;
@@ -388,18 +395,31 @@ export async function runAdminAction(eventId: string, a: A): Promise<string | vo
       return `봇 ${added}명 추가`;
     }
 
-    case 'score_add': {
-      const teamId = str(a.teamId, '팀');
-      const delta = int(a.delta, '점수');
-      if (!snap.teams.some((t) => t.id === teamId)) return fail('팀을 찾을 수 없습니다');
-      await addScore(eventId, teamId, cur?.id ?? null, delta, String(a.reason ?? '수동 입력').slice(0, 60) || '수동 입력', { manual: true });
+    case 'game_finalize': {
+      const st = snap.steps.find((x) => x.id === a.stepId) ?? fail('스텝을 찾을 수 없습니다');
+      if (!(GAME_KINDS as readonly string[]).includes(st.kind)) return fail('점수를 매기는 게임이 아닙니다');
+      let winners: string[];
+      if (Array.isArray(a.winners)) {
+        winners = a.winners.filter((id: string) => snap.teams.some((t) => t.id === id));
+      } else {
+        // 자동 판정: 게임 내 득점이 가장 높은 팀(동점이면 모두)
+        const pts = new Map<string, number>(snap.teams.map((t) => [t.id, 0]));
+        for (const e of snap.scores) if (e.step_id === st.id && !e.meta?.win) pts.set(e.team_id, (pts.get(e.team_id) ?? 0) + e.delta);
+        const max = Math.max(0, ...pts.values());
+        winners = max > 0 ? [...pts].filter(([, v]) => v === max).map(([k]) => k) : [];
+        if (!winners.length) return fail('게임 득점이 없어 자동 판정할 수 없습니다. 승리 팀을 직접 선택하세요');
+      }
+      if (!winners.length) return fail('승리 팀을 선택하세요');
+      const winPoints = a.winPoints != null ? int(a.winPoints, '승리 점수') : Number(st.config.winPoints ?? DEFAULT_WIN_POINTS[st.kind] ?? 0);
+      await revokeWins(eventId, snap, st);
+      for (const w of winners) await addScore(eventId, w, st.id, winPoints, `${st.title} 승리`, { win: true });
+      await patchStep(st, { config: { winPoints }, state: { finalized: true, winners } });
       return;
     }
-    case 'score_undo': {
-      const e = snap.scores.find((x) => x.id === a.scoreId) ?? fail('기록을 찾을 수 없습니다');
-      if (e.meta?.reversal || e.meta?.reversedBy) return fail('이미 되돌린 기록입니다');
-      await addScore(eventId, e.team_id, e.step_id, -e.delta, `${e.reason} 되돌리기`, { reversal: true, of: e.id });
-      must(await db().from('score_events').update({ meta: { ...e.meta, reversedBy: true } }).eq('id', e.id), 'undo mark');
+    case 'game_unfinalize': {
+      const st = snap.steps.find((x) => x.id === a.stepId) ?? fail('스텝을 찾을 수 없습니다');
+      await revokeWins(eventId, snap, st);
+      await patchStep(st, { state: { finalized: false, winners: [] } });
       return;
     }
 

@@ -3,9 +3,9 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLiveState } from '@/lib/client/useLiveState';
 import { OfflineBadge, Scoreboard } from '@/components/ui';
-import { Brand, ValueJourney, VerseCard } from '@/components/brand';
+import { Brand, Intro, ValueJourney, VerseCard, WinnerBanner } from '@/components/brand';
 import { STEP_MODULES } from '@/components/steps/registry';
-import { VERSES } from '@/lib/verses';
+import { GUIDES, VERSES } from '@/lib/verses';
 
 export default function PlayPage() {
   const router = useRouter();
@@ -22,6 +22,9 @@ export default function PlayPage() {
   const Mod = kind ? STEP_MODULES[kind] : null;
   const team = state.teams.find((t) => t.id === state.me?.teamId);
   const hasVerse = !!kind && !!VERSES[kind];
+  const hasIntro = !!kind && (!!VERSES[kind] || !!GUIDES[kind]);
+  const gr = state.gameResults?.find((g) => g.stepId === state.step?.id);
+  const winners = (gr?.winners ?? []).map((id) => state.teams.find((t) => t.id === id)?.name ?? '');
   const started = !!state.step?.state.started;
   const inGame = kind === 'amen' || kind === 'one_voice' || kind === 'sheep_voice';
 
@@ -40,14 +43,15 @@ export default function PlayPage() {
         </div>
       </header>
 
-      {kind && hasVerse && !started ? (
+      {kind && hasIntro && !started ? (
         <>
-          <VerseCard kind={kind} variant="phone" />
-          <p className="text-center font-display text-lg opacity-70">곧 시작해요! 말씀을 마음에 담아 보세요 🙏</p>
+          <Intro kind={kind} variant="phone" />
+          <p className="text-center font-display text-lg opacity-70">곧 시작해요! 설명을 들어 보세요 🙏</p>
         </>
       ) : (
         <>
           {kind && hasVerse && <VerseCard kind={kind} variant="phone" />}
+          {gr?.finalized && <WinnerBanner names={winners} points={gr.winPoints} />}
           <div className="card px-4 py-5">{Mod ? <Mod.Player state={state} serverNow={serverNow} /> : <p className="text-center opacity-60">대기 중…</p>}</div>
         </>
       )}

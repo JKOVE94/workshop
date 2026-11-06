@@ -9,7 +9,7 @@ export function BoardStage({ state }: StepProps) {
     <div className="space-y-8">
       <h2 className="text-center text-6xl font-black">👥 우리 팀</h2>
       {state.teams.length === 0 ? (
-        <p className="text-center text-4xl text-neutral-400">아직 팀이 편성되지 않았어요</p>
+        <p className="text-center text-4xl text-neutral-500">아직 팀이 편성되지 않았어요</p>
       ) : (
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${state.teams.length}, minmax(0, 1fr))` }}>
           {state.teams.map((t) => (
@@ -30,7 +30,7 @@ export function PlainBoardPlayer({ state }: StepProps) {
     <div className="space-y-4 text-center">
       <TeamNameCard state={state} />
       {team && <p className="text-xl font-bold">나는 <TeamTag team={team} /></p>}
-      {team && <p className="text-neutral-600">팀원: {team.memberIds.map((id) => nameOf(state, id)).join(', ')}</p>}
+      {team && <p className="text-neutral-700">팀원: {team.memberIds.map((id) => nameOf(state, id)).join(', ')}</p>}
       <Scoreboard teams={state.teams} />
     </div>
   );
@@ -46,7 +46,7 @@ export function AwardsPlayer({ state }: StepProps) {
   return (
     <div className="space-y-4 text-center">
       <p className="text-2xl font-black">🏆 시상식</p>
-      <p className="text-neutral-600">빔 화면을 봐 주세요!</p>
+      <p className="text-neutral-700">빔 화면을 봐 주세요!</p>
       {shown && <p className="text-4xl font-black">{MEDAL[myIdx] ?? ''} {myIdx + 1}위 · {state.teams[myIdx].name}</p>}
     </div>
   );
@@ -64,7 +64,7 @@ export function AwardsStage({ state }: StepProps) {
           const visible = i >= n - reveal; // 꼴찌부터 한 팀씩 공개
           const first = i === 0 && visible;
           return (
-            <div key={t.id} className={`flex items-center justify-between rounded-3xl px-10 py-6 border-[3px] border-[var(--ink)] shadow-[0_6px_0_var(--ink)] transition-all duration-700 ${visible ? 'text-white' : 'bg-neutral-200 text-transparent dark:bg-neutral-800'} ${first ? 'scale-105 ring-8 ring-yellow-300' : ''}`} style={visible ? { background: t.color } : undefined}>
+            <div key={t.id} className={`flex items-center justify-between rounded-3xl px-10 py-6 border-[3px] border-[var(--ink)] shadow-[0_6px_0_var(--ink)] transition-all duration-700 ${visible ? 'text-white' : 'bg-neutral-200 text-transparent'} ${first ? 'scale-105 ring-8 ring-yellow-300' : ''}`} style={visible ? { background: t.color } : undefined}>
               <span className="text-6xl font-black">{visible ? `${MEDAL[i] ?? ''} ${i + 1}위` : `${i + 1}위`}</span>
               <span className="text-5xl font-bold">{visible ? t.name : '???'}</span>
               <span className="text-7xl font-black tabular-nums">{visible ? `${t.total}점` : ''}</span>
@@ -77,7 +77,7 @@ export function AwardsStage({ state }: StepProps) {
         <div className="mx-auto max-w-4xl space-y-3">
           <h3 className="text-center text-4xl font-black">게임별 우승</h3>
           {state.gameResults.map((g) => (
-            <div key={g.stepId} className="flex items-center justify-between rounded-2xl bg-neutral-100 px-8 py-4 text-3xl dark:bg-neutral-800">
+            <div key={g.stepId} className="flex items-center justify-between rounded-2xl bg-neutral-100 px-8 py-4 text-3xl">
               <span className="font-semibold">{g.title}</span>
               <span className="font-black">{g.winners.length ? g.winners.map((w) => teamOf(state, w)?.name).join(', ') : '-'}</span>
             </div>
@@ -94,7 +94,7 @@ export function AwardsAdmin({ state, act }: AdminProps) {
   const labels = ['시작 전', ...state.teams.map((_, i) => `${n - i}위 공개`), '게임별 우승'];
   return (
     <div className="space-y-3">
-      <p className="text-sm text-neutral-600">현재: <b>{labels[reveal]}</b> (꼴찌부터 한 팀씩 공개합니다)</p>
+      <p className="text-sm text-neutral-700">현재: <b>{labels[reveal]}</b> (꼴찌부터 한 팀씩 공개합니다)</p>
       <div className="flex gap-2">
         <button className={btnGhost} disabled={reveal <= 0} onClick={() => act({ type: 'awards_reveal', value: reveal - 1 })}>◀ 되돌리기</button>
         <button className={`${btn} flex-1 py-3 text-base`} disabled={reveal > n} onClick={() => act({ type: 'awards_reveal', value: reveal + 1 })}>
@@ -121,7 +121,7 @@ export function TeamsDashboard({ state, act }: { state: PublicState; act?: Admin
                 {t.nameLocked && <button className="underline" onClick={() => act({ type: 'team_unlock', teamId: t.id })}>잠금 해제</button>}
               </div>
             )}
-            <div className="text-neutral-600">{t.memberIds.map((id) => nameOf(state, id)).join(', ') || '팀원 없음'}</div>
+            <div className="text-neutral-700">{t.memberIds.map((id) => nameOf(state, id)).join(', ') || '팀원 없음'}</div>
           </div>
         ))}
         {state.teams.length === 0 && <p className="text-sm text-neutral-500">허밍 팀 찾기 스텝에 진입하면 팀이 편성됩니다.</p>}
@@ -129,16 +129,16 @@ export function TeamsDashboard({ state, act }: { state: PublicState; act?: Admin
       {state.gameResults && state.gameResults.length > 0 && (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead><tr className="border-b"><th className="py-1">게임</th>{state.teams.map((t) => <th key={t.id} className="px-2"><TeamDot color={t.color} /> {t.name}</th>)}<th className="px-2">승리</th></tr></thead>
+            <thead><tr className="border-b"><th className="py-1">게임</th>{state.teams.map((t) => <th key={t.id} className="px-2"><TeamDot color={t.color} /> {t.name}</th>)}<th className="px-2">승리 팀</th></tr></thead>
             <tbody>
               {state.gameResults.map((g) => (
                 <tr key={g.stepId} className="border-b">
                   <td className="py-1 font-semibold">{g.title}</td>
                   {state.teams.map((t) => <td key={t.id} className={`px-2 tabular-nums ${g.winners.includes(t.id) ? 'font-black text-emerald-700' : ''}`}>{g.points[t.id] ?? 0}</td>)}
-                  <td className="px-2 font-bold">{g.winners.length ? g.winners.map((w) => teamOf(state, w)?.name).join(', ') : '-'}</td>
+                  <td className="px-2 font-bold">{g.finalized ? `${g.winners.map((w) => teamOf(state, w)?.name).join(', ')} (+${g.winPoints})` : '미확정'}</td>
                 </tr>
               ))}
-              <tr><td className="py-1 font-black">합계</td>{state.teams.map((t) => <td key={t.id} className="px-2 font-black tabular-nums">{t.total}</td>)}<td /></tr>
+              <tr><td className="py-1 font-black">누적 승리 점수</td>{state.teams.map((t) => <td key={t.id} className="px-2 font-black tabular-nums">{t.total}</td>)}<td /></tr>
             </tbody>
           </table>
         </div>

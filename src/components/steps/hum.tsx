@@ -92,7 +92,7 @@ export function HumAdmin({ state, act, serverNow }: AdminProps) {
   const [sec, setSec] = useState(String(state.step?.config.timerSeconds ?? 180));
   return (
     <div className="space-y-4">
-      <div className="rounded-lg bg-neutral-100 p-2 text-sm dark:bg-neutral-800">
+      <div className="rounded-lg bg-neutral-100 p-2 text-sm">
         <b>고정 곡</b>: {h?.songs?.map((x) => x.title).join(' / ')}
         <button className={`${btnGhost} ml-2`} onClick={() => confirm('팀·곡 배정을 모두 지우고 새로 만듭니다. 점수 기록이 있으면 불가합니다. 계속할까요?') && act({ type: 'hum_rebuild' })}>팀 다시 만들기</button>
       </div>

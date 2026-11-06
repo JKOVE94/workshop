@@ -7,7 +7,7 @@ const focusMatch = (ms: PubMatch[]): PubMatch | undefined => ms.find((m) => m.st
 
 function Traits({ m, big }: { m: PubMatch; big?: boolean }) {
   const used = m.traits.filter((t) => t.ok || t.dup);
-  if (!used.length) return <p className={big ? 'text-3xl text-neutral-400' : 'text-sm text-neutral-400'}>아직 기록이 없습니다</p>;
+  if (!used.length) return <p className={big ? 'text-3xl text-neutral-500' : 'text-sm text-neutral-500'}>아직 기록이 없습니다</p>;
   return (
     <ul className={`flex flex-wrap gap-2 ${big ? 'gap-3' : ''}`}>
       {used.map((t) => (
@@ -41,13 +41,13 @@ export function AmenPlayer({ state, serverNow }: StepProps) {
             <span>{m.successA} : {m.successB}</span>
             <TeamTag team={teamOf(state, m.teamB)} />
           </div>
-          <div className="text-center text-sm text-neutral-600">{nameOf(state, m.playerA)} vs {nameOf(state, m.playerB)}</div>
+          <div className="text-center text-sm text-neutral-700">{nameOf(state, m.playerA)} vs {nameOf(state, m.playerB)}</div>
           {m.status === 'live' && <SecondsTimer startAt={m.meta.turnStartedAt} seconds={5} serverNow={serverNow} />}
           <div className="pt-1 text-xs font-semibold text-neutral-500">사용된 특성</div>
           <Traits m={m} />
         </div>
       )}
-      <Scoreboard teams={state.teams} />
+      <Scoreboard teams={state.teams} mode="game" />
     </div>
   );
 }
@@ -55,7 +55,7 @@ export function AmenPlayer({ state, serverNow }: StepProps) {
 export function AmenStage({ state, serverNow }: StepProps) {
   const [sound, setSound] = useState(false);
   const a = state.amen;
-  if (!a) return <p className="text-center text-5xl text-neutral-400">대진 준비 중…</p>;
+  if (!a) return <p className="text-center text-5xl text-neutral-500">대진 준비 중…</p>;
   const m = focusMatch(a.matches);
   const ta = teamOf(state, m?.teamA);
   const tb = teamOf(state, m?.teamB);
@@ -98,7 +98,7 @@ export function AmenStage({ state, serverNow }: StepProps) {
           <Traits m={m} big />
         </div>
       )}
-      <div className="border-t pt-4"><Scoreboard teams={state.teams} big /></div>
+      <div className="border-t pt-4"><Scoreboard teams={state.teams} big mode="game" /></div>
     </div>
   );
 }
@@ -144,7 +144,7 @@ function MatchAdmin({ state, m, act, serverNow }: { state: PublicState; m: PubMa
 
       {m.status === 'live' && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between rounded-lg bg-neutral-100 p-2 dark:bg-neutral-800">
+          <div className="flex items-center justify-between rounded-lg bg-neutral-100 p-2">
             <div className="text-sm"><b style={{ color: (turn === 'a' ? ta : tb)?.color }}>{(turn === 'a' ? ta : tb)?.name}</b> 차례 ({nameOf(state, turn === 'a' ? m.playerA : m.playerB)})</div>
             <div className="w-24"><SecondsTimer startAt={m.meta.turnStartedAt} seconds={state.step?.config.turnSeconds ?? 5} serverNow={serverNow} /></div>
             <div className="text-lg font-black">{m.successA} : {m.successB}</div>

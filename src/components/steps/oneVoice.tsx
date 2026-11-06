@@ -16,19 +16,19 @@ export function OneVoicePlayer({ state }: StepProps) {
           {ov.myLetter && <div className="mt-3 text-5xl font-black">&ldquo;{ov.myLetter}&rdquo;</div>}
         </div>
       ) : (
-        <div className="rounded-2xl bg-neutral-100 p-6 text-neutral-600 dark:bg-neutral-800">이번 라운드는 응원해요 📣</div>
+        <div className="rounded-2xl border-[3px] border-[var(--ink)] bg-[var(--gold)]/40 p-6 text-center font-display text-2xl text-[var(--ink)]">이번 라운드는 응원해요 📣<div className="mt-1 text-sm font-semibold opacity-70">우리 팀 친구들을 큰 소리로 응원해 주세요!</div></div>
       )}
       {myOrder && (
-        <div className="text-sm text-neutral-600">말하는 순서: {myOrder.playerIds.map((id) => nameOf(state, id)).join(' → ')}</div>
+        <div className="text-sm text-neutral-700">말하는 순서: {myOrder.playerIds.map((id) => nameOf(state, id)).join(' → ')}</div>
       )}
-      <Scoreboard teams={state.teams} />
+      <Scoreboard teams={state.teams} mode="game" />
     </div>
   );
 }
 
 export function OneVoiceStage({ state }: StepProps) {
   const ov = state.oneVoice;
-  if (!ov) return <p className="text-center text-5xl text-neutral-400">준비 중…</p>;
+  if (!ov) return <p className="text-center text-5xl text-neutral-500">준비 중…</p>;
   return (
     <div className="space-y-8">
       <h2 className="text-center text-5xl font-black">🗣️ 한마음과 한 입으로 · {ov.round + 1}라운드</h2>
@@ -40,7 +40,7 @@ export function OneVoiceStage({ state }: StepProps) {
           const res = ov.results[t.id];
           return (
             <div key={t.id} className="rounded-3xl p-6 text-white border-[3px] border-[var(--ink)] shadow-[0_6px_0_var(--ink)]" style={{ background: t.color }}>
-              <div className="flex items-baseline justify-between"><span className="text-4xl font-black">{t.name}</span><span className="text-6xl font-black tabular-nums">{t.total}</span></div>
+              <div className="flex items-baseline justify-between"><span className="text-4xl font-black">{t.name}</span><span className="text-6xl font-black tabular-nums">{t.gamePoints}</span></div>
               <ol className="mt-4 space-y-2 text-3xl font-semibold">
                 {order.map((id, i) => <li key={id}>{i + 1}. {nameOf(state, id)}</li>)}
               </ol>
@@ -63,7 +63,7 @@ export function OneVoiceAdmin({ state, act }: AdminProps) {
         <button className={btnGhost} onClick={() => act({ type: 'ov_prev_round' })}>◀ 이전 라운드</button>
         <button className={btn} onClick={() => act({ type: 'ov_next_round' })}>다음 라운드 ▶</button>
       </div>
-      <div className="rounded-lg bg-neutral-100 p-3 dark:bg-neutral-800">
+      <div className="rounded-lg bg-neutral-100 p-3">
         {ov.word ? (
           <div className="flex items-center justify-between">
             <span className="text-3xl font-black">{ov.word}</span>
@@ -79,7 +79,7 @@ export function OneVoiceAdmin({ state, act }: AdminProps) {
           const res = ov.results[t.id];
           return (
             <div key={t.id} className="space-y-2 rounded-lg border p-2 text-sm">
-              <div className="font-bold"><TeamTag team={t} /> · {t.total}점</div>
+              <div className="font-bold"><TeamTag team={t} /> · {t.gamePoints}점</div>
               <div>{order.map((id, i) => `${i + 1}.${nameOf(state, id)}`).join(' ')}</div>
               <div className="flex gap-2">
                 <button className={`${btn} ${res === true ? 'ring-2 ring-emerald-400' : ''}`} onClick={() => act({ type: 'ov_result', teamId: t.id, ok: true })}>⭕ 성공</button>

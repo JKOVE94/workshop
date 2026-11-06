@@ -6,6 +6,10 @@ export const TEAM_NAMES = ['A팀', 'B팀', 'C팀', 'D팀', 'E팀'];
 /** 허밍 팀 찾기 곡 (고정). 곡 수 = 팀 수 */
 export const HUM_SONGS = ['좋으신 하나님 (You Are Good)', '감사함으로', '내 마음을 가득 채운'];
 
+/** 게임별 승리 점수 기본값 (관리자 화면에서 수정 가능) */
+export const DEFAULT_WIN_POINTS: Record<string, number> = { amen: 10, one_voice: 10, sheep_voice: 20 };
+export const GAME_KINDS = ['amen', 'one_voice', 'sheep_voice'] as const;
+
 export const ONE_VOICE_WORDS = [
   '모세', '다윗', '요나', '이삭', '야곱', '에스더', '룻',
   '베드로', '갈릴리', '여호와', '다니엘', '사무엘', '스데반', '바울이',
@@ -27,10 +31,11 @@ export const DEFAULT_STEPS: { kind: StepKind; title: string; config: Record<stri
       failEndsMatch: true,
       turnSeconds: 5,
       matchSeconds: 120,
+      winPoints: 10,
     },
   },
-  { kind: 'one_voice', title: '한마음과 한 입으로', config: { words: ONE_VOICE_WORDS, pointsPerSuccess: 1, letterMode: true } },
-  { kind: 'sheep_voice', title: '내 양은 내 음성을 들으며', config: { correct: 1, wrong: -1 } },
+  { kind: 'one_voice', title: '한마음과 한 입으로', config: { words: ONE_VOICE_WORDS, pointsPerSuccess: 1, letterMode: true, winPoints: 10 } },
+  { kind: 'sheep_voice', title: '내 양은 내 음성을 들으며', config: { correct: 1, wrong: -1, winPoints: 20 } },
   { kind: 'part1_result', title: '1부 결과', config: {} },
   { kind: 'awards', title: '시상식', config: {} },
 ];

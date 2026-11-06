@@ -1,11 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useLiveState } from '@/lib/client/useLiveState';
-import { OfflineBadge, TeamDot, btn, btnGhost, input, nameOf, teamOf, type Act } from '@/components/ui';
+import { OfflineBadge, btn, btnGhost, input, nameOf, type Act } from '@/components/ui';
 import { STEP_MODULES } from '@/components/steps/registry';
 import { TeamsDashboard } from '@/components/steps/awards';
 import { Brand } from '@/components/brand';
-import { VERSES } from '@/lib/verses';
+import { GameFinishPanel } from '@/components/steps/gameFinish';
+import { GUIDES, VERSES } from '@/lib/verses';
 import { STEP_KINDS, type PublicState, type StepKind } from '@/lib/types';
 
 function Login({ onDone }: { onDone: () => void }) {
@@ -42,7 +43,7 @@ function StepConfig({ state, act }: { state: PublicState; act: Act }) {
   const [err, setErr] = useState('');
   return (
     <details className="text-sm">
-      <summary className="cursor-pointer font-semibold text-neutral-600">스텝 설정 (config JSON · 점수·시간·단어 등)</summary>
+      <summary className="cursor-pointer font-semibold text-neutral-700">스텝 설정 (config JSON · 점수·시간·단어 등)</summary>
       <textarea className={`${input} mt-2 w-full font-mono text-xs`} rows={10} value={text} onChange={(e) => setText(e.target.value)} />
       <div className="mt-1 flex items-center gap-2">
         <button className={btn} onClick={() => {
@@ -60,7 +61,6 @@ function Dashboard({ state, act, offline, serverNow }: { state: PublicState; act
   const Mod = cur ? STEP_MODULES[cur.kind] : null;
   const [newName, setNewName] = useState('');
   const [addKind, setAddKind] = useState<StepKind>('entry');
-  const [custom, setCustom] = useState<Record<string, string>>({});
 
   return (
     <main className="mx-auto max-w-3xl space-y-4 px-4 pb-24 pt-4">
@@ -84,7 +84,7 @@ function Dashboard({ state, act, offline, serverNow }: { state: PublicState; act
         </div>
         <ol className="space-y-1">
           {steps.map((s, i) => (
-            <li key={s.id} className={`flex items-center gap-2 rounded-lg px-2 py-1 text-sm ${s.id === cur?.id ? 'bg-[var(--primary)] font-bold text-white' : s.status === 'done' ? 'text-neutral-400' : ''}`}>
+            <li key={s.id} className={`flex items-center gap-2 rounded-lg px-2 py-1 text-sm ${s.id === cur?.id ? 'bg-[var(--primary)] font-bold text-white' : s.status === 'done' ? 'text-neutral-500' : ''}`}>
               <span className="w-5 text-right">{i + 1}</span>
               <button className="flex-1 text-left" onClick={() => s.id !== cur?.id && act({ type: 'step_goto', stepId: s.id })}>{s.title}</button>
               <button aria-label="위로" className="px-1" onClick={() => act({ type: 'step_move', stepId: s.id, dir: 'up' })}>↑</button>
@@ -94,7 +94,7 @@ function Dashboard({ state, act, offline, serverNow }: { state: PublicState; act
           ))}
         </ol>
         <details className="text-sm">
-          <summary className="cursor-pointer font-semibold text-neutral-600">스텝 추가</summary>
+          <summary className="cursor-pointer font-semibold text-neutral-700">스텝 추가</summary>
           <div className="mt-2 flex flex-wrap gap-2">
             <select className={input} value={addKind} onChange={(e) => setAddKind(e.target.value as StepKind)}>{STEP_KINDS.map((k) => <option key={k.kind} value={k.kind}>{k.label}</option>)}</select>
             <button className={btn} onClick={() => act({ type: 'step_add', kind: addKind })}>추가</button>
@@ -104,45 +104,22 @@ function Dashboard({ state, act, offline, serverNow }: { state: PublicState; act
 
       {cur && Mod && (
         <Section title={`${cur.title} 진행`}>
-          {VERSES[cur.kind] && (
+          {(VERSES[cur.kind] || GUIDES[cur.kind]) && (
             <div className="flex flex-wrap items-center gap-2 rounded-2xl border-[3px] border-dashed border-[var(--ink)] bg-[var(--gold)]/30 p-3">
-              <span className="text-sm font-bold">📖 {VERSES[cur.kind]!.value}</span>
+              <span className="text-sm font-bold">📖 {VERSES[cur.kind]?.value ?? GUIDES[cur.kind]?.title}</span>
               {cur.state.started ? (
-                <button className={btnGhost} onClick={() => act({ type: 'activity_start', stepId: cur.id, value: false })}>말씀 화면 다시 보이기</button>
+                <button className={btnGhost} onClick={() => act({ type: 'activity_start', stepId: cur.id, value: false })}>말씀·설명 화면 다시 보이기</button>
               ) : (
-                <button className={`${btn} py-3 text-base`} onClick={() => act({ type: 'activity_start', stepId: cur.id, value: true })}>▶ 말씀 나눈 뒤 활동 시작</button>
+                <button className={`${btn} py-3 text-base`} onClick={() => act({ type: 'activity_start', stepId: cur.id, value: true })}>▶ 설명 마치고 활동 시작</button>
               )}
-              <span className="text-xs opacity-70">{cur.state.started ? '활동 화면 표시 중' : '지금은 빔·폰에 말씀만 보입니다'}</span>
+              <span className="text-xs opacity-70">{cur.state.started ? '활동 화면 표시 중' : '지금은 빔·폰에 말씀과 설명만 보입니다'}</span>
             </div>
           )}
           <Mod.Admin state={state} act={act} serverNow={serverNow} />
+          <GameFinishPanel state={state} act={act} serverNow={serverNow} />
           <StepConfig key={cur.id + JSON.stringify(cur.config)} state={state} act={act} />
         </Section>
       )}
-
-      <Section title="점수 수동 입력 (종이 점수판 대체)">
-        <div className="space-y-2">
-          {state.teams.map((t) => (
-            <div key={t.id} className="flex flex-wrap items-center gap-2">
-              <span className="w-24 font-bold"><TeamDot color={t.color} /> {t.name} <span className="tabular-nums">{t.total}</span></span>
-              {[-3, -1, 1, 3].map((d) => <button key={d} className={btnGhost} onClick={() => act({ type: 'score_add', teamId: t.id, delta: d, reason: '수동 입력' })}>{d > 0 ? '+' : ''}{d}</button>)}
-              <input className={`${input} w-16`} inputMode="numeric" placeholder="±n" value={custom[t.id] ?? ''} onChange={(e) => setCustom({ ...custom, [t.id]: e.target.value })} />
-              <button className={btn} onClick={async () => { const n = Number(custom[t.id]); if (Number.isInteger(n) && n) { if (await act({ type: 'score_add', teamId: t.id, delta: n, reason: '수동 입력' })) setCustom({ ...custom, [t.id]: '' }); } }}>입력</button>
-            </div>
-          ))}
-        </div>
-        <details>
-          <summary className="cursor-pointer text-sm font-semibold text-neutral-600">점수 기록 ({state.scoreLog?.length ?? 0})</summary>
-          <ul className="mt-2 space-y-1 text-sm">
-            {state.scoreLog?.map((e) => (
-              <li key={e.id} className="flex items-center justify-between gap-2">
-                <span><TeamDot color={teamOf(state, e.teamId)?.color ?? '#999'} /> {teamOf(state, e.teamId)?.name} <b>{e.delta > 0 ? '+' : ''}{e.delta}</b> · {e.reason}</span>
-                <button className="text-xs text-neutral-500 underline" onClick={() => act({ type: 'score_undo', scoreId: e.id })}>되돌리기</button>
-              </li>
-            ))}
-          </ul>
-        </details>
-      </Section>
 
       <Section title={`참가자 (${state.participants.length}명)`} defaultOpen={false}>
         <form className="flex gap-2" onSubmit={async (e) => { e.preventDefault(); if (newName.trim() && (await act({ type: 'participant_add', name: newName }))) setNewName(''); }}>

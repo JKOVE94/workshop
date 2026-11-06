@@ -14,7 +14,7 @@ export function TeamDot({ color, size = 12 }: { color: string; size?: number }) 
 }
 
 export function TeamTag({ team, big }: { team?: PubTeam; big?: boolean }) {
-  if (!team) return <span className="text-neutral-400">팀 없음</span>;
+  if (!team) return <span className="text-neutral-500">팀 없음</span>;
   return (
     <span className={`inline-flex items-center gap-2 font-bold ${big ? 'text-3xl' : ''}`}>
       <TeamDot color={team.color} size={big ? 22 : 12} />
@@ -24,14 +24,15 @@ export function TeamTag({ team, big }: { team?: PubTeam; big?: boolean }) {
 }
 
 /** 점수판. big=true 는 빔 화면용 */
-export function Scoreboard({ teams, big, highlight }: { teams: PubTeam[]; big?: boolean; highlight?: string | null }) {
-  if (!teams.length) return <p className={big ? 'text-3xl text-neutral-400' : 'text-neutral-500'}>아직 팀이 없습니다</p>;
+export function Scoreboard({ teams, big, highlight, mode = 'total' }: { teams: PubTeam[]; big?: boolean; highlight?: string | null; mode?: 'total' | 'game' }) {
+  if (!teams.length) return <p className={big ? 'text-3xl text-neutral-500' : 'text-neutral-500'}>아직 팀이 없습니다</p>;
   return (
     <div className={`grid gap-3 ${big ? 'gap-6' : ''}`} style={{ gridTemplateColumns: `repeat(${teams.length}, minmax(0, 1fr))` }}>
       {teams.map((t) => (
         <div key={t.id} className={`border-[3px] border-[var(--ink)] text-center text-white ${big ? 'rounded-[2rem] p-8 shadow-[0_8px_0_var(--ink)]' : 'rounded-2xl p-3 shadow-[0_4px_0_var(--ink)]'} ${highlight === t.id ? 'ring-4 ring-yellow-300' : ''}`} style={{ background: t.color }}>
           <div className={`font-display ${big ? 'text-5xl' : 'text-base'}`}>{t.name}</div>
-          <div className={`font-display tabular-nums ${big ? 'mt-3 text-9xl' : 'text-4xl'}`}>{t.total}</div>
+          <div className={`font-display tabular-nums ${big ? 'mt-3 text-9xl' : 'text-4xl'}`}>{mode === 'game' ? t.gamePoints : t.total}</div>
+          <div className={big ? 'text-2xl opacity-90' : 'text-[10px] opacity-90'}>{mode === 'game' ? '이번 게임 득점' : '누적 승리 점수'}</div>
         </div>
       ))}
     </div>

@@ -1,6 +1,7 @@
 import { rank } from '../game/scoring';
 import { usedPlayers } from '../game/league';
 import { letterCount, letters, pickWord, speakingOrder } from '../game/oneVoice';
+import { DEFAULT_WIN_POINTS, GAME_KINDS } from './defaults';
 import { DEFAULT_AMEN_POINTS } from '../game/scoring';
 import type { PubMatch, PublicState, Role, Snapshot } from '../types';
 
@@ -12,14 +13,15 @@ export function buildState(s: Snapshot, role: Role, participantId: string | null
   s.participants.forEach((p, i) => memberOrder.set(p.id, i));
   const teamOf = new Map(s.members.map((m) => [m.participant_id, m.team_id]));
 
-  // 팀 점수 / 타이브레이크(성공한 칭찬 수)
+  // 누적 점수 = 게임별 '승리 점수'(meta.win)만 합산. 게임 내 득점(raw)은 승자 판정과 동점 처리에만 쓴다.
   const totals = new Map<string, number>();
-  for (const e of s.scores) totals.set(e.team_id, (totals.get(e.team_id) ?? 0) + e.delta);
-  const successByTeam = new Map<string, number>();
-  for (const m of s.matches) {
-    for (const t of s.traits.filter((x) => x.match_id === m.id && x.ok)) {
-      const tid = t.side === 'a' ? m.team_a : m.team_b;
-      successByTeam.set(tid, (successByTeam.get(tid) ?? 0) + 1);
+  const rawAll = new Map<string, number>();
+  const rawNow = new Map<string, number>();
+  for (const e of s.scores) {
+    if (e.meta?.win) totals.set(e.team_id, (totals.get(e.team_id) ?? 0) + e.delta);
+    else {
+      rawAll.set(e.team_id, (rawAll.get(e.team_id) ?? 0) + e.delta);
+      if (e.step_id && e.step_id === step?.id) rawNow.set(e.team_id, (rawNow.get(e.team_id) ?? 0) + e.delta);
     }
   }
 
@@ -32,7 +34,8 @@ export function buildState(s: Snapshot, role: Role, participantId: string | null
   const teams = s.teams.map((t) => ({
     id: t.id, name: t.name, color: t.color, nameLocked: !!t.name_locked,
     total: totals.get(t.id) ?? 0,
-    tiebreak: successByTeam.get(t.id) ?? 0,
+    tiebreak: rawAll.get(t.id) ?? 0,
+    gamePoints: rawNow.get(t.id) ?? 0,
     memberIds: membersOf(t.id),
   }));
   const rankedTeams = step?.kind === 'part1_result' || step?.kind === 'awards' ? rank(teams) : teams;
@@ -132,20 +135,22 @@ export function buildState(s: Snapshot, role: Role, participantId: string | null
     }
   }
 
-  // 게임별 득점/우승팀 (점수 기록에서 파생 — 별도 입력 불필요)
+  // 게임별 득점(raw)과 확정된 승리 팀
   out.gameResults = s.steps
-    .filter((st) => s.scores.some((e) => e.step_id === st.id))
+    .filter((st) => (GAME_KINDS as readonly string[]).includes(st.kind))
     .map((st) => {
       const points: Record<string, number> = {};
       for (const t of s.teams) points[t.id] = 0;
-      for (const e of s.scores) if (e.step_id === st.id) points[e.team_id] = (points[e.team_id] ?? 0) + e.delta;
-      const max = Math.max(...Object.values(points));
-      const winners = max > 0 ? Object.keys(points).filter((k) => points[k] === max) : [];
-      return { stepId: st.id, title: st.title, kind: st.kind, points, winners };
+      for (const e of s.scores) if (e.step_id === st.id && !e.meta?.win) points[e.team_id] = (points[e.team_id] ?? 0) + e.delta;
+      const max = Math.max(0, ...Object.values(points));
+      const leaders = max > 0 ? Object.keys(points).filter((k) => points[k] === max) : [];
+      const finalized = !!st.state.finalized;
+      return {
+        stepId: st.id, title: st.title, kind: st.kind, points, leaders, finalized,
+        winners: finalized ? ((st.state.winners ?? []) as string[]) : [],
+        winPoints: Number(st.config.winPoints ?? DEFAULT_WIN_POINTS[st.kind] ?? 0),
+      };
     });
 
-  if (role === 'admin') {
-    out.scoreLog = [...s.scores].reverse().slice(0, 40).map((e) => ({ id: e.id, teamId: e.team_id, delta: e.delta, reason: e.reason, at: e.created_at }));
-  }
   return out;
 }

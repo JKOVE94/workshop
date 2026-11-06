@@ -7,7 +7,7 @@ export function EntryPlayer({ state }: StepProps) {
   return (
     <div className="space-y-2 text-center">
       <p className="text-xl font-bold">입장 완료! 🙌</p>
-      <p className="text-neutral-600">잠시 후 시작해요. 이 화면을 켜 두세요.</p>
+      <p className="text-neutral-700">잠시 후 시작해요. 이 화면을 켜 두세요.</p>
       <p className="text-sm text-neutral-500">지금 {state.participants.length}명 입장</p>
     </div>
   );
@@ -41,7 +41,7 @@ export function EntryStage({ state }: StepProps) {
       <p className="text-5xl font-bold">{state.participants.length}명 입장</p>
       <div className="mx-auto flex max-w-5xl flex-wrap justify-center gap-3">
         {state.participants.map((p) => (
-          <span key={p.id} className="rounded-full bg-neutral-200 px-5 py-2 text-3xl font-semibold dark:bg-neutral-800">{p.name}</span>
+          <span key={p.id} className="rounded-full bg-neutral-200 px-5 py-2 text-3xl font-semibold">{p.name}</span>
         ))}
       </div>
     </div>
@@ -59,7 +59,7 @@ export function CloseStage({ state }: StepProps) {
       <p className="text-5xl">{state.participants.length}명이 함께합니다</p>
       <div className="mx-auto flex max-w-5xl flex-wrap justify-center gap-3">
         {state.participants.map((p) => (
-          <span key={p.id} className="rounded-full bg-neutral-200 px-5 py-2 text-3xl font-semibold dark:bg-neutral-800">{p.name}</span>
+          <span key={p.id} className="rounded-full bg-neutral-200 px-5 py-2 text-3xl font-semibold">{p.name}</span>
         ))}
       </div>
     </div>
@@ -91,11 +91,11 @@ export function ResultStage({ state }: StepProps) {
           </div>
         ))}
       </div>
-      <p className="text-center text-3xl text-neutral-500">동점이면 성공한 칭찬 수가 앞섭니다</p>
+      <p className="text-center text-3xl text-neutral-500">동점이면 게임에서 얻은 득점 합이 앞섭니다</p>
     </div>
   );
 }
 
 export function PlainAdmin({ state }: AdminProps) {
-  return <p className="text-sm text-neutral-500">{state.step?.title} 단계입니다. 별도 설정이 없습니다. 점수는 아래 수동 입력을 사용하세요.</p>;
+  return <p className="text-sm text-neutral-500">{state.step?.title} 단계입니다. 별도 설정이 없습니다.</p>;
 }

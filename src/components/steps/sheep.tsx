@@ -7,13 +7,13 @@ export function SheepPlayer({ state }: StepProps) {
   const team = teamOf(state, state.me?.teamId);
   return (
     <div className="space-y-4 text-center">
-      <p className="text-neutral-600">&ldquo;내 양은 내 음성을 들으며…&rdquo; (요 10:27)</p>
+      <p className="text-neutral-700">&ldquo;내 양은 내 음성을 들으며…&rdquo; (요 10:27)</p>
       <div className="rounded-3xl bg-[var(--primary)] p-6 text-white border-[3px] border-[var(--ink)] shadow-[0_6px_0_var(--ink)]">
         <div className="text-2xl font-black">목자의 음성을 따라가요 🐑</div>
         <p className="mt-2 text-sm opacity-90">양이 가져온 카드의 뒷면 QR을<br />폰 카메라로 스캔하세요.<br /><b>걷기만 가능! 뛰지 마세요.</b></p>
       </div>
-      {team && <p>우리 팀: <TeamTag team={team} /> {team.total}점</p>}
-      <Scoreboard teams={state.teams} />
+      {team && <p>우리 팀: <TeamTag team={team} /> {team.gamePoints}점</p>}
+      <Scoreboard teams={state.teams} mode="game" />
       {sh && sh.scans.length > 0 && (
         <ul className="space-y-1 text-left text-sm">
           {sh.scans.slice(-5).reverse().map((s, i) => (
@@ -31,7 +31,7 @@ export function SheepStage({ state }: StepProps) {
     <div className="space-y-10">
       <h2 className="text-center text-5xl font-black">🐑 내 양은 내 음성을 들으며</h2>
       <p className="text-center text-3xl text-neutral-500">&ldquo;내 양은 내 음성을 들으며 나는 그들을 알며 그들은 나를 따르느니라&rdquo; (요 10:27)</p>
-      <Scoreboard teams={state.teams} big />
+      <Scoreboard teams={state.teams} big mode="game" />
       {sh && sh.scans.length > 0 && (
         <div className="mx-auto flex max-w-5xl flex-wrap justify-center gap-3">
           {sh.scans.slice(-8).reverse().map((s, i) => (
@@ -73,7 +73,7 @@ export function SheepAdmin({ state, act }: AdminProps) {
           ))}
         </div>
       )}
-      <p className="text-xs text-neutral-500">QR 스캔이 안 되면 아래 &lsquo;점수 수동 입력&rsquo;으로 팀 점수를 직접 조정하세요. 스캔 점수: 정답 {state.step?.config.correct ?? 1} / 오답 {state.step?.config.wrong ?? -1}</p>
+      <p className="text-xs text-neutral-500">스캔 득점: 정답 {state.step?.config.correct ?? 1} / 오답 {state.step?.config.wrong ?? -1}. 득점이 가장 높은 팀이 게임 승리 팀이 됩니다 (아래 &lsquo;승리 확정&rsquo;).</p>
     </div>
   );
 }

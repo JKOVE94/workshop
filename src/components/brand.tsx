@@ -1,5 +1,5 @@
 'use client';
-import { JOURNEY, VERSES } from '@/lib/verses';
+import { GUIDES, JOURNEY, VERSES } from '@/lib/verses';
 import type { StepKind } from '@/lib/types';
 
 export function Brand({ big }: { big?: boolean }) {
@@ -67,5 +67,47 @@ export function VerseCard({ kind, variant }: { kind: StepKind; variant: 'intro' 
       </div>
       <p className={`font-bold opacity-70 ${big ? 'text-3xl' : 'text-sm'}`}>{v.tagline}</p>
     </section>
+  );
+}
+
+/** 그림 위주 활동 설명. stage: 가로 타일 / phone: 2열 */
+export function GuideStrip({ kind, variant }: { kind: StepKind; variant: 'stage' | 'phone' }) {
+  const g = GUIDES[kind];
+  if (!g) return null;
+  const big = variant === 'stage';
+  return (
+    <section className={`card pop-in ${big ? 'mx-auto w-full max-w-6xl space-y-6 px-10 py-8' : 'space-y-3 px-4 py-5'}`}>
+      <h3 className={`text-center font-display ${big ? 'text-5xl' : 'text-xl'}`}>🎮 {g.title} 이렇게 해요</h3>
+      <ol className={big ? 'flex items-stretch justify-center gap-4' : 'grid grid-cols-2 gap-3'}>
+        {g.steps.map((s, i) => (
+          <li key={i} className={`flex flex-1 flex-col items-center justify-center rounded-3xl border-[3px] border-[var(--ink)] bg-white text-center shadow-[0_4px_0_var(--ink)] ${big ? 'gap-3 px-4 py-6' : 'gap-1 px-2 py-3'}`}>
+            <span className={`grid place-items-center rounded-full bg-[var(--gold)] font-display ${big ? 'size-10 text-2xl' : 'size-6 text-xs'}`}>{i + 1}</span>
+            <span className={big ? 'text-7xl leading-none' : 'text-4xl leading-none'}>{s.icon}</span>
+            <span className={`font-bold leading-snug ${big ? 'text-2xl' : 'text-xs'}`}>{s.text}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+/** 활동 시작 전 화면: 말씀(있으면) + 그림 설명 */
+export function Intro({ kind, variant }: { kind: StepKind; variant: 'stage' | 'phone' }) {
+  return (
+    <div className={variant === 'stage' ? 'flex w-full flex-col items-center gap-8' : 'space-y-4'}>
+      <VerseCard kind={kind} variant={variant === 'stage' ? 'intro' : 'phone'} />
+      <GuideStrip kind={kind} variant={variant} />
+    </div>
+  );
+}
+
+/** 게임 승리 팀 발표 배너 */
+export function WinnerBanner({ names, points, big }: { names: string[]; points: number; big?: boolean }) {
+  if (!names.length) return null;
+  return (
+    <div className={`card pop-in bg-[var(--gold)] text-center ${big ? 'px-10 py-8' : 'px-4 py-4'}`}>
+      <div className={`font-display ${big ? 'text-7xl' : 'text-2xl'}`}>🏆 {names.join(' · ')} 승리!</div>
+      <div className={`font-bold ${big ? 'mt-2 text-4xl' : 'text-sm'}`}>승리 점수 +{points}점</div>
+    </div>
   );
 }

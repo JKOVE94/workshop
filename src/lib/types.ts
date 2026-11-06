@@ -58,7 +58,7 @@ export interface Snapshot {
 export type Role = 'player' | 'stage' | 'admin';
 
 // ---- 클라이언트로 내려가는 상태 ----
-export interface PubTeam { id: string; name: string; color: string; nameLocked: boolean; total: number; tiebreak: number; memberIds: string[] }
+export interface PubTeam { id: string; name: string; color: string; nameLocked: boolean; /** 누적 승리 점수 */ total: number; /** 동점 시 기준: 게임 내 득점 합 */ tiebreak: number; /** 지금 게임 내 득점 */ gamePoints: number; memberIds: string[] }
 export interface PubParticipant { id: string; name: string; teamId: string | null }
 export interface PubStep { id: string; kind: StepKind; title: string; status: StepRow['status']; sort: number }
 
@@ -101,6 +101,5 @@ export interface PublicState {
   oneVoice?: PubOneVoice;
   sheep?: PubSheep;
   /** 게임(스텝)별 팀 득점과 우승팀 */
-  gameResults?: { stepId: string; title: string; kind: StepKind; points: Record<string, number>; winners: string[] }[];
-  scoreLog?: { id: string; teamId: string; delta: number; reason: string; at: string }[];
+  gameResults?: { stepId: string; title: string; kind: StepKind; points: Record<string, number>; winners: string[]; finalized: boolean; winPoints: number; leaders: string[] }[];
 }

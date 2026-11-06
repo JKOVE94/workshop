@@ -1,9 +1,9 @@
 'use client';
 import { useLiveState } from '@/lib/client/useLiveState';
 import { OfflineBadge } from '@/components/ui';
-import { Brand, ValueJourney, VerseCard } from '@/components/brand';
+import { Brand, Intro, ValueJourney, VerseCard, WinnerBanner } from '@/components/brand';
 import { STEP_MODULES } from '@/components/steps/registry';
-import { VERSES } from '@/lib/verses';
+import { GUIDES, VERSES } from '@/lib/verses';
 
 /** 빔 전용 화면: 읽기 전용, 인증 없음, 개인정보 없음(이름만) */
 export default function StagePage() {
@@ -12,6 +12,9 @@ export default function StagePage() {
   const kind = state.step?.kind;
   const Mod = kind ? STEP_MODULES[kind] : null;
   const hasVerse = !!kind && !!VERSES[kind];
+  const hasIntro = !!kind && (!!VERSES[kind] || !!GUIDES[kind]);
+  const gr = state.gameResults?.find((g) => g.stepId === state.step?.id);
+  const winners = (gr?.winners ?? []).map((id) => state.teams.find((t) => t.id === id)?.name ?? '');
   const started = !!state.step?.state.started;
 
   return (
@@ -22,12 +25,13 @@ export default function StagePage() {
         <ValueJourney kind={kind} big />
       </header>
 
-      {/* 활동마다 말씀이 먼저: 관리자가 '활동 시작'을 누르기 전에는 말씀 화면만 보인다 */}
-      {kind && hasVerse && !started ? (
-        <div className="grid flex-1 place-items-center"><VerseCard kind={kind} variant="intro" /></div>
+      {/* 활동마다 말씀+설명이 먼저: 관리자가 '활동 시작'을 누르기 전에는 소개 화면만 보인다 */}
+      {kind && hasIntro && !started ? (
+        <div className="grid flex-1 place-items-center"><Intro kind={kind} variant="stage" /></div>
       ) : (
         <>
           {kind && hasVerse && <VerseCard kind={kind} variant="banner" />}
+          {gr?.finalized && <WinnerBanner names={winners} points={gr.winPoints} big />}
           <div className="flex-1">
             {Mod ? <Mod.Stage state={state} serverNow={serverNow} /> : <p className="text-center font-display text-6xl opacity-60">대기 중…</p>}
           </div>
