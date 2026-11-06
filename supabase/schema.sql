@@ -34,8 +34,10 @@ create table if not exists teams (
   event_id uuid not null references events(id) on delete cascade,
   name text not null,
   color text not null,
-  sort int not null default 0
+  sort int not null default 0,
+  name_locked boolean not null default false
 );
+alter table teams add column if not exists name_locked boolean not null default false;
 
 create table if not exists team_members (
   participant_id uuid primary key references participants(id) on delete cascade,

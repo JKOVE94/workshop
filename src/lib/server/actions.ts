@@ -1,6 +1,6 @@
 import { db, must } from './supabase';
 import { loadSnapshot, seedSteps } from './repo';
-import { TEAM_COLORS, TEAM_NAMES } from './defaults';
+import { HUM_SONGS, TEAM_COLORS, TEAM_NAMES } from './defaults';
 import { smallestGroup, splitEvenly } from '../game/balance';
 import { leagueMatches, usedPlayers } from '../game/league';
 import { isDuplicateTrait, type DupMode } from '../game/traits';
@@ -43,14 +43,19 @@ async function ensureTeams(eventId: string, count: number): Promise<void> {
   if (members.length) must(await db().from('team_members').insert(members), 'team_members');
 }
 
-async function ensureSongs(eventId: string, step: StepRow): Promise<void> {
-  const have = must(await db().from('hum_songs').select('id').eq('event_id', eventId), 'hum_songs') as { id: string }[];
-  if (have.length) return;
-  const titles: string[] = (step.config.songs ?? []).map((x: string) => String(x).trim()).filter(Boolean);
+async function ensureSongs(eventId: string): Promise<void> {
+  const have = must(await db().from('hum_songs').select('id,title,sort').eq('event_id', eventId).order('sort'), 'hum_songs') as { id: string; title: string; sort: number }[];
+  if (have.length) {
+    // 곡은 고정: 예전 값이 남아 있으면 고정 곡으로 맞춘다 (멱등)
+    for (const row of have) {
+      const want = HUM_SONGS[row.sort];
+      if (want && row.title !== want) must(await db().from('hum_songs').update({ title: want }).eq('id', row.id), 'song 동기화');
+    }
+    return;
+  }
   const teams = must(await db().from('teams').select('id,sort').eq('event_id', eventId).order('sort'), 'teams') as { id: string }[];
-  if (!titles.length || titles.length < teams.length) fail(`허밍 곡이 팀 수(${teams.length})보다 적습니다`);
-  const rows = teams.map((t, i) => ({ event_id: eventId, title: titles[i], team_id: t.id, sort: i }));
-  must(await db().from('hum_songs').insert(rows), 'hum_songs 생성');
+  if (HUM_SONGS.length < teams.length) fail(`허밍 곡이 팀 수(${teams.length})보다 적습니다`);
+  must(await db().from('hum_songs').insert(teams.map((t, i) => ({ event_id: eventId, title: HUM_SONGS[i], team_id: t.id, sort: i }))), 'hum_songs 생성');
 }
 
 async function ensureMatches(eventId: string, step: StepRow): Promise<void> {
@@ -65,9 +70,8 @@ async function ensureMatches(eventId: string, step: StepRow): Promise<void> {
 /** 스텝 진입 부수효과. 반드시 멱등이어야 한다 (이전/다음을 눌러도 안전). */
 async function onEnter(eventId: string, step: StepRow) {
   if (step.kind === 'hum_team') {
-    const count = (step.config.songs ?? []).map((x: string) => String(x).trim()).filter(Boolean).length;
-    await ensureTeams(eventId, count);
-    await ensureSongs(eventId, step);
+    await ensureTeams(eventId, HUM_SONGS.length);
+    await ensureSongs(eventId);
   }
   if (step.kind === 'amen') await ensureMatches(eventId, step);
 }
@@ -259,16 +263,6 @@ async function humAction(eventId: string, snap: Snapshot, a: A) {
     const groups = splitEvenly(snap.participants.map((p) => p.id), teams.length);
     const rows = groups.flatMap((g, ti) => g.map((pid, i) => ({ participant_id: pid, team_id: teams[ti].id, sort: i })));
     if (rows.length) must(await db().from('team_members').insert(rows), 'members 생성');
-  } else if (a.type === 'hum_set_songs') {
-    const songs = (Array.isArray(a.songs) ? a.songs : []).map((x: unknown) => String(x).trim()).filter(Boolean);
-    if (snap.teams.length) {
-      if (songs.length !== snap.teams.length) return fail(`곡은 팀 수(${snap.teams.length})와 같아야 합니다`);
-      for (let i = 0; i < songs.length; i++) {
-        const row = snap.songs[i];
-        if (row) must(await db().from('hum_songs').update({ title: songs[i] }).eq('id', row.id), 'song');
-      }
-    }
-    await patchStep(step, { config: { songs } });
   } else if (a.type === 'hum_rebuild') {
     if (snap.scores.length) return fail('점수 기록이 있어 팀을 다시 만들 수 없습니다 (리셋 필요)');
     must(await db().from('teams').delete().eq('event_id', eventId), 'teams 삭제');
@@ -352,6 +346,17 @@ export async function runAdminAction(eventId: string, a: A): Promise<string | vo
     }
     case 'participant_delete': {
       must(await db().from('participants').delete().eq('id', str(a.participantId, '참가자')), 'delete');
+      return;
+    }
+    case 'team_rename': {
+      const team = snap.teams.find((t) => t.id === a.teamId) ?? fail('팀을 찾을 수 없습니다');
+      const name = str(a.name, '팀명', 12);
+      if (snap.teams.some((t) => t.id !== team.id && t.name === name)) return fail('이미 있는 팀명입니다');
+      must(await db().from('teams').update({ name, name_locked: !!a.lock }).eq('id', team.id), 'team rename');
+      return;
+    }
+    case 'team_unlock': {
+      must(await db().from('teams').update({ name_locked: false }).eq('id', str(a.teamId, '팀')), 'team unlock');
       return;
     }
     case 'team_assign': {

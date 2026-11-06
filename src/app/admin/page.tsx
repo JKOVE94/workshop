@@ -72,7 +72,7 @@ function Dashboard({ state, act, offline, serverNow }: { state: PublicState; act
       </header>
 
       <Section title="팀 구성 · 게임별 승패">
-        <TeamsDashboard state={state} />
+        <TeamsDashboard state={state} act={act} />
       </Section>
 
       <Section title={`진행 · 현재: ${cur?.title ?? '-'}`}>

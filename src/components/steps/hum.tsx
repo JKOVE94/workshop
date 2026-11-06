@@ -2,6 +2,42 @@
 import { useState } from 'react';
 import { Countdown, TeamTag, btn, btnGhost, input, teamOf, nameOf, type AdminProps, type StepProps } from '../ui';
 
+/** 팀 대표 한 명이 팀명을 정하고 '확인'을 누르면 확정(이후 변경 불가) */
+export function TeamNameCard({ state }: { state: StepProps['state'] }) {
+  const team = teamOf(state, state.me?.teamId);
+  const [name, setName] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  if (!team) return null;
+  if (team.nameLocked) {
+    return <div className="rounded-2xl border-2 p-4 text-center" style={{ borderColor: team.color }}><div className="text-xs text-neutral-500">우리 팀 이름 (확정)</div><div className="text-2xl font-black">{team.name}</div></div>;
+  }
+  async function submit() {
+    const n = name.trim();
+    if (!n || !confirm(`팀명을 '${n}'(으)로 확정할까요?\n확인하면 더 이상 바꿀 수 없어요.`)) return;
+    setBusy(true);
+    setError('');
+    try {
+      const res = await fetch('/api/team-name', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: n }) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? '저장하지 못했어요');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '저장하지 못했어요');
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="space-y-2 rounded-2xl border-2 p-4" style={{ borderColor: team.color }}>
+      <div className="text-sm font-bold">우리 팀 이름을 지어 주세요</div>
+      <p className="text-xs text-neutral-500">팀 대표 한 명이 입력하고 &lsquo;확인&rsquo;을 누르세요. 확인하면 바꿀 수 없어요.</p>
+      <input value={name} maxLength={12} onChange={(e) => setName(e.target.value)} placeholder={`현재: ${team.name}`} className={`${input} w-full`} />
+      <button disabled={busy || !name.trim()} onClick={submit} className={`${btn} w-full`}>{busy ? '저장 중…' : '확인 (팀명 확정)'}</button>
+      {error && <p className="text-sm text-red-600">{error}</p>}
+    </div>
+  );
+}
+
 export function HumPlayer({ state, serverNow }: StepProps) {
   const h = state.hum;
   const team = teamOf(state, state.me?.teamId);
@@ -18,6 +54,7 @@ export function HumPlayer({ state, serverNow }: StepProps) {
       )}
       <Countdown endAt={h?.timerEnd} serverNow={serverNow} />
       {h?.revealed && team && <p className="text-xl">우리 팀은 <TeamTag team={team} /> 입니다!</p>}
+      {h?.revealed && <TeamNameCard state={state} />}
     </div>
   );
 }
@@ -52,18 +89,12 @@ export function HumStage({ state, serverNow }: StepProps) {
 
 export function HumAdmin({ state, act, serverNow }: AdminProps) {
   const h = state.hum;
-  const [songs, setSongs] = useState<string>(() => (state.step?.kind === 'hum_team' ? (state.step.config.songs ?? []) : []).join('\n'));
   const [sec, setSec] = useState(String(state.step?.config.timerSeconds ?? 180));
   return (
     <div className="space-y-4">
-      <div>
-        <label className="text-sm font-semibold">허밍 곡 (한 줄에 하나, 팀 수만큼)</label>
-        <textarea className={`${input} mt-1 w-full`} rows={4} value={songs} onChange={(e) => setSongs(e.target.value)} />
-        <div className="mt-2 flex flex-wrap gap-2">
-          <button className={btn} onClick={() => act({ type: 'hum_set_songs', songs: songs.split('\n') })}>곡 저장</button>
-          <button className={btnGhost} onClick={() => confirm('팀·곡 배정을 모두 지우고 새로 만듭니다. 계속할까요?') && act({ type: 'hum_rebuild' })}>팀 수 바꿔 다시 만들기</button>
-        </div>
-        <p className="mt-1 text-xs text-neutral-500">팀 수는 이 스텝에 처음 진입할 때 곡 수로 정해집니다. 팀 수를 바꾸려면 곡을 수정한 뒤 &lsquo;다시 만들기&rsquo;.</p>
+      <div className="rounded-lg bg-neutral-100 p-2 text-sm dark:bg-neutral-800">
+        <b>고정 곡</b>: {h?.songs?.map((x) => x.title).join(' / ')}
+        <button className={`${btnGhost} ml-2`} onClick={() => confirm('팀·곡 배정을 모두 지우고 새로 만듭니다. 점수 기록이 있으면 불가합니다. 계속할까요?') && act({ type: 'hum_rebuild' })}>팀 다시 만들기</button>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <input className={`${input} w-24`} value={sec} onChange={(e) => setSec(e.target.value)} inputMode="numeric" />

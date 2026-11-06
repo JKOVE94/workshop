@@ -30,7 +30,7 @@ export function buildState(s: Snapshot, role: Role, participantId: string | null
       .map((m) => m.participant_id);
 
   const teams = s.teams.map((t) => ({
-    id: t.id, name: t.name, color: t.color,
+    id: t.id, name: t.name, color: t.color, nameLocked: !!t.name_locked,
     total: totals.get(t.id) ?? 0,
     tiebreak: successByTeam.get(t.id) ?? 0,
     memberIds: membersOf(t.id),

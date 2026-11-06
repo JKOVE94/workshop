@@ -23,7 +23,7 @@ export interface StepRow {
   status: 'pending' | 'active' | 'done';
 }
 export interface ParticipantRow { id: string; event_id: string; name: string; created_at: string }
-export interface TeamRow { id: string; event_id: string; name: string; color: string; sort: number }
+export interface TeamRow { id: string; event_id: string; name: string; color: string; sort: number; name_locked: boolean }
 export interface MemberRow { participant_id: string; team_id: string; sort: number }
 export interface ScoreRow { id: string; event_id: string; team_id: string; step_id: string | null; delta: number; reason: string; meta: Record<string, any>; created_at: string }
 export interface SongRow { id: string; event_id: string; title: string; team_id: string | null; sort: number }
@@ -58,7 +58,7 @@ export interface Snapshot {
 export type Role = 'player' | 'stage' | 'admin';
 
 // ---- 클라이언트로 내려가는 상태 ----
-export interface PubTeam { id: string; name: string; color: string; total: number; tiebreak: number; memberIds: string[] }
+export interface PubTeam { id: string; name: string; color: string; nameLocked: boolean; total: number; tiebreak: number; memberIds: string[] }
 export interface PubParticipant { id: string; name: string; teamId: string | null }
 export interface PubStep { id: string; kind: StepKind; title: string; status: StepRow['status']; sort: number }
 

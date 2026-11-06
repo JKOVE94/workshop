@@ -1,4 +1,5 @@
 'use client';
+import { TeamNameCard } from './hum';
 import { Scoreboard, TeamDot, TeamTag, btn, btnGhost, nameOf, teamOf, type AdminProps, type StepProps } from '../ui';
 import type { PublicState } from '@/lib/types';
 
@@ -27,6 +28,7 @@ export function PlainBoardPlayer({ state }: StepProps) {
   const team = teamOf(state, state.me?.teamId);
   return (
     <div className="space-y-4 text-center">
+      <TeamNameCard state={state} />
       {team && <p className="text-xl font-bold">나는 <TeamTag team={team} /></p>}
       {team && <p className="text-neutral-600">팀원: {team.memberIds.map((id) => nameOf(state, id)).join(', ')}</p>}
       <Scoreboard teams={state.teams} />
@@ -105,13 +107,20 @@ export function AwardsAdmin({ state, act }: AdminProps) {
 }
 
 /** 관리자 대시보드: 팀 구성 + 게임별 승패 */
-export function TeamsDashboard({ state }: { state: PublicState }) {
+export function TeamsDashboard({ state, act }: { state: PublicState; act?: AdminProps['act'] }) {
   return (
     <div className="space-y-4">
       <div className="grid gap-2 sm:grid-cols-3">
         {state.teams.map((t) => (
           <div key={t.id} className="rounded-xl border p-3 text-sm" style={{ borderColor: t.color }}>
             <div className="mb-1 flex justify-between font-bold"><span><TeamDot color={t.color} /> {t.name} · {t.memberIds.length}명</span><span className="tabular-nums">{t.total}점</span></div>
+            {act && (
+              <div className="mb-1 flex gap-2 text-xs">
+                <span>{t.nameLocked ? '🔒 팀명 확정' : '✏️ 팀명 미확정'}</span>
+                <button className="underline" onClick={() => { const n = prompt('새 팀명 (확정 상태로 저장)', t.name); if (n && n.trim()) act({ type: 'team_rename', teamId: t.id, name: n, lock: true }); }}>이름 변경</button>
+                {t.nameLocked && <button className="underline" onClick={() => act({ type: 'team_unlock', teamId: t.id })}>잠금 해제</button>}
+              </div>
+            )}
             <div className="text-neutral-600">{t.memberIds.map((id) => nameOf(state, id)).join(', ') || '팀원 없음'}</div>
           </div>
         ))}
