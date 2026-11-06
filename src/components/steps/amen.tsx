@@ -29,7 +29,7 @@ export function AmenPlayer({ state, serverNow }: StepProps) {
     <div className="space-y-4">
       <p className="text-center text-sm text-neutral-500">&ldquo;너 ○○처럼 ○○한 거 알지?&rdquo; → <b>&ldquo;아멘!&rdquo;</b><br />성경 인물에 빗댄 칭찬 · 특성 중복 금지 · 5초 안에!</p>
       {mine && (
-        <div className="rounded-2xl bg-indigo-600 p-4 text-center text-white">
+        <div className="rounded-2xl bg-[var(--primary)] p-4 text-center text-white">
           <div className="text-lg font-black">🎤 내가 출전해요!</div>
           <div className="text-sm opacity-90">{mine.status === 'live' ? '지금 진행 중' : '곧 시작합니다. 앞으로 나와 주세요'}</div>
         </div>

@@ -286,6 +286,10 @@ export async function runAdminAction(eventId: string, a: A): Promise<string | vo
   if (type.startsWith('ov_')) return oneVoiceAction(eventId, snap, a);
   if (type.startsWith('sheep_')) return sheepAction(eventId, snap, a);
   if (type.startsWith('hum_')) return humAction(eventId, snap, a);
+  if (type === 'activity_start') {
+    const st = snap.steps.find((x) => x.id === a.stepId) ?? fail('스텝을 찾을 수 없습니다');
+    return patchStep(st, { state: { started: !!a.value } });
+  }
   if (type === 'awards_reveal') {
     const st = stepOf(snap, 'awards');
     const n = Math.max(0, Math.min(snap.teams.length + 1, int(a.value, '단계')));

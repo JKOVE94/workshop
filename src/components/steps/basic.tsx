@@ -25,7 +25,7 @@ function JoinQr() {
     <div className="flex flex-col items-center gap-3">
       {src && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt="입장 QR" className="h-80 w-80 rounded-2xl bg-white p-2 shadow-lg" />
+        <img src={src} alt="입장 QR" className="h-80 w-80 rounded-2xl bg-white p-2 border-[3px] border-[var(--ink)] shadow-[0_6px_0_var(--ink)]" />
       )}
       <p className="text-2xl text-neutral-500">{url.replace(/^https?:\/\//, '')}</p>
     </div>
@@ -84,7 +84,7 @@ export function ResultStage({ state }: StepProps) {
       <h2 className="text-center text-6xl font-black">🏆 1부 결과</h2>
       <div className="mx-auto max-w-4xl space-y-4">
         {state.teams.map((t, i) => (
-          <div key={t.id} className="flex items-center justify-between rounded-3xl px-10 py-6 text-white shadow-lg" style={{ background: t.color, opacity: i === 0 ? 1 : 0.9 }}>
+          <div key={t.id} className="flex items-center justify-between rounded-3xl px-10 py-6 text-white border-[3px] border-[var(--ink)] shadow-[0_6px_0_var(--ink)]" style={{ background: t.color, opacity: i === 0 ? 1 : 0.9 }}>
             <span className="text-6xl font-black">{i + 1}위</span>
             <span className="text-5xl font-bold">{t.name}</span>
             <span className="text-7xl font-black tabular-nums">{t.total}점</span>

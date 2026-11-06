@@ -45,7 +45,7 @@ export function HumPlayer({ state, serverNow }: StepProps) {
     <div className="space-y-4 text-center">
       <p className="text-neutral-500">허밍으로만 같은 곡 사람을 찾으세요 🎵<br />말·가사 금지!</p>
       {h?.mySong ? (
-        <div className="rounded-3xl bg-indigo-600 p-8 text-white shadow-lg">
+        <div className="rounded-3xl bg-[var(--primary)] p-8 text-white border-[3px] border-[var(--ink)] shadow-[0_6px_0_var(--ink)]">
           <div className="text-sm opacity-80">내 곡</div>
           <div className="mt-2 text-4xl font-black">{h.mySong}</div>
         </div>
@@ -73,7 +73,7 @@ export function HumStage({ state, serverNow }: StepProps) {
       {h?.revealed && (
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${state.teams.length}, minmax(0, 1fr))` }}>
           {state.teams.map((t) => (
-            <div key={t.id} className="rounded-3xl p-6 text-white shadow-lg" style={{ background: t.color }}>
+            <div key={t.id} className="rounded-3xl p-6 text-white border-[3px] border-[var(--ink)] shadow-[0_6px_0_var(--ink)]" style={{ background: t.color }}>
               <div className="text-4xl font-black">{t.name}</div>
               <div className="mt-1 text-2xl opacity-90">{h.songs?.find((s) => s.teamId === t.id)?.title}</div>
               <ul className="mt-4 space-y-1 text-3xl font-semibold">

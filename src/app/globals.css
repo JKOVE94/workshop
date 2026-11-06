@@ -1,26 +1,66 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ink: #1f1b4b;
+  --primary: #6d5dfc;
+  --gold: #ffcc33;
+  --paper: #fffdf6;
+  --background: #fff3d6;
+  --foreground: #1f1b4b;
+  color-scheme: light;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-body), system-ui, sans-serif;
+  --font-display: var(--font-display), var(--font-body), sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
+  background-color: var(--background);
+  background-image:
+    radial-gradient(rgba(255, 190, 80, 0.45) 1.5px, transparent 1.6px),
+    linear-gradient(180deg, #dff1ff 0%, #fff3d6 55%, #ffe2c2 100%);
+  background-size: 22px 22px, 100% 100%;
+  background-attachment: fixed;
 }
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  letter-spacing: -0.01em;
+}
+h2 { text-shadow: 0 3px 0 rgba(31, 27, 75, 0.12); }
+
+/* 컴포넌트 클래스는 layer 안에 둬서 Tailwind 유틸리티가 덮어쓸 수 있게 한다 */
+@layer components {
+  .card {
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    border-radius: 1.5rem;
+    box-shadow: 0 6px 0 var(--ink);
+  }
+  .btn-game {
+    display: inline-flex; align-items: center; justify-content: center; gap: .35rem;
+    padding: .6rem 1rem; font-weight: 800; font-size: .9rem; line-height: 1.2;
+    color: #fff; background: var(--primary);
+    border: 3px solid var(--ink); border-radius: 1rem;
+    box-shadow: 0 4px 0 var(--ink);
+    transition: transform .08s, box-shadow .08s;
+  }
+  .btn-game:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+  .btn-game:disabled { opacity: .45; }
+  .btn-ghost { color: var(--ink); background: #fff; }
+  .field {
+    background: #fff; color: var(--ink);
+    border: 3px solid var(--ink); border-radius: 1rem;
+    padding: .6rem .9rem; font-size: 1rem; font-weight: 600;
+  }
+  .field:focus { outline: 3px solid var(--gold); outline-offset: 1px; }
+}
+
+@keyframes pop-in { 0% { transform: scale(.85); opacity: 0 } 100% { transform: scale(1); opacity: 1 } }
+.pop-in { animation: pop-in .35s cubic-bezier(.2, 1.4, .4, 1) both; }
+@keyframes float { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }
+.float { animation: float 3s ease-in-out infinite; }

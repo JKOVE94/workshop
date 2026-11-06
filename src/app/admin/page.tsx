@@ -4,6 +4,8 @@ import { useLiveState } from '@/lib/client/useLiveState';
 import { OfflineBadge, TeamDot, btn, btnGhost, input, nameOf, teamOf, type Act } from '@/components/ui';
 import { STEP_MODULES } from '@/components/steps/registry';
 import { TeamsDashboard } from '@/components/steps/awards';
+import { Brand } from '@/components/brand';
+import { VERSES } from '@/lib/verses';
 import { STEP_KINDS, type PublicState, type StepKind } from '@/lib/types';
 
 function Login({ onDone }: { onDone: () => void }) {
@@ -27,8 +29,8 @@ function Login({ onDone }: { onDone: () => void }) {
 
 function Section({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
   return (
-    <details open={defaultOpen} className="rounded-2xl border border-neutral-200 bg-white/60 p-4 dark:border-neutral-700 dark:bg-neutral-900/60">
-      <summary className="cursor-pointer text-base font-black">{title}</summary>
+    <details open={defaultOpen} className="card p-4">
+      <summary className="cursor-pointer font-display text-lg">{title}</summary>
       <div className="mt-3 space-y-3">{children}</div>
     </details>
   );
@@ -64,7 +66,7 @@ function Dashboard({ state, act, offline, serverNow }: { state: PublicState; act
     <main className="mx-auto max-w-3xl space-y-4 px-4 pb-24 pt-4">
       <OfflineBadge offline={offline} />
       <header className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-black">워크샵 1부 관리자</h1>
+        <div className="flex items-center gap-3"><Brand /><span className="rounded-full bg-[var(--ink)] px-2 py-0.5 font-display text-xs text-white">관리자</span></div>
         <div className="flex gap-2 text-sm">
           <a className={btnGhost} href="/stage" target="_blank" rel="noreferrer">🖥 빔 화면</a>
           <a className={btnGhost} href="/play" target="_blank" rel="noreferrer">📱 참가자 화면</a>
@@ -82,7 +84,7 @@ function Dashboard({ state, act, offline, serverNow }: { state: PublicState; act
         </div>
         <ol className="space-y-1">
           {steps.map((s, i) => (
-            <li key={s.id} className={`flex items-center gap-2 rounded-lg px-2 py-1 text-sm ${s.id === cur?.id ? 'bg-indigo-600 font-bold text-white' : s.status === 'done' ? 'text-neutral-400' : ''}`}>
+            <li key={s.id} className={`flex items-center gap-2 rounded-lg px-2 py-1 text-sm ${s.id === cur?.id ? 'bg-[var(--primary)] font-bold text-white' : s.status === 'done' ? 'text-neutral-400' : ''}`}>
               <span className="w-5 text-right">{i + 1}</span>
               <button className="flex-1 text-left" onClick={() => s.id !== cur?.id && act({ type: 'step_goto', stepId: s.id })}>{s.title}</button>
               <button aria-label="위로" className="px-1" onClick={() => act({ type: 'step_move', stepId: s.id, dir: 'up' })}>↑</button>
@@ -102,6 +104,17 @@ function Dashboard({ state, act, offline, serverNow }: { state: PublicState; act
 
       {cur && Mod && (
         <Section title={`${cur.title} 진행`}>
+          {VERSES[cur.kind] && (
+            <div className="flex flex-wrap items-center gap-2 rounded-2xl border-[3px] border-dashed border-[var(--ink)] bg-[var(--gold)]/30 p-3">
+              <span className="text-sm font-bold">📖 {VERSES[cur.kind]!.value}</span>
+              {cur.state.started ? (
+                <button className={btnGhost} onClick={() => act({ type: 'activity_start', stepId: cur.id, value: false })}>말씀 화면 다시 보이기</button>
+              ) : (
+                <button className={`${btn} py-3 text-base`} onClick={() => act({ type: 'activity_start', stepId: cur.id, value: true })}>▶ 말씀 나눈 뒤 활동 시작</button>
+              )}
+              <span className="text-xs opacity-70">{cur.state.started ? '활동 화면 표시 중' : '지금은 빔·폰에 말씀만 보입니다'}</span>
+            </div>
+          )}
           <Mod.Admin state={state} act={act} serverNow={serverNow} />
           <StepConfig key={cur.id + JSON.stringify(cur.config)} state={state} act={act} />
         </Section>

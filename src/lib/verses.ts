@@ -1,0 +1,43 @@
+import type { StepKind } from './types';
+
+export interface Verse {
+  /** 1→2→3 으로 쌓이는 가치 순서 */
+  order: 1 | 2 | 3;
+  value: string;
+  tagline: string;
+  /** 본문 (참조 + 말씀) */
+  passages: { ref: string; text: string }[];
+}
+
+/** 활동 → 가치·말씀. 허밍 팀 찾기는 팀 결성이라 가치에서 제외 (docs/01-기획.md) */
+export const VERSES: Partial<Record<StepKind, Verse>> = {
+  amen: {
+    order: 1,
+    value: '서로를 받아들이고 존중한다',
+    tagline: '칭찬을 그대로 받아들이는 것이 존중의 시작이에요',
+    passages: [
+      { ref: '롬 12:10', text: '형제를 사랑하여 서로 우애하고 존경하기를 서로 먼저 하며' },
+      { ref: '빌 2:3', text: '아무 일에든지 다툼이나 허영으로 하지 말고 오직 겸손한 마음으로 각각 자기보다 남을 낫게 여기고' },
+    ],
+  },
+  one_voice: {
+    order: 2,
+    value: '한마음과 한 입으로',
+    tagline: '서로 뜻이 같아야 한 단어가 완성돼요',
+    passages: [
+      { ref: '롬 15:5-6', text: '이제 인내와 위로의 하나님이 너희로 그리스도 예수를 본받아 서로 뜻이 같게 하여 주사 한마음과 한 입으로 하나님 곧 우리 주 예수 그리스도의 아버지께 영광을 돌리게 하려 하노라' },
+    ],
+  },
+  sheep_voice: {
+    order: 3,
+    value: '예수님의 인도하심을 따라간다',
+    tagline: '시야가 좁은 양도 목자의 음성은 구분해서 따라가요',
+    passages: [{ ref: '요 10:27', text: '내 양은 내 음성을 들으며 나는 그들을 알며 그들은 나를 따르느니라' }],
+  },
+};
+
+export const JOURNEY = [
+  { order: 1, label: '받아들임', kind: 'amen' },
+  { order: 2, label: '한마음', kind: 'one_voice' },
+  { order: 3, label: '인도하심', kind: 'sheep_voice' },
+] as const;

@@ -13,7 +13,7 @@ export function BoardStage({ state }: StepProps) {
       ) : (
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${state.teams.length}, minmax(0, 1fr))` }}>
           {state.teams.map((t) => (
-            <div key={t.id} className="rounded-3xl p-6 text-white shadow-lg" style={{ background: t.color }}>
+            <div key={t.id} className="rounded-3xl p-6 text-white border-[3px] border-[var(--ink)] shadow-[0_6px_0_var(--ink)]" style={{ background: t.color }}>
               <div className="flex items-baseline justify-between"><span className="text-5xl font-black">{t.name}</span><span className="text-6xl font-black tabular-nums">{t.total}</span></div>
               <ul className="mt-4 space-y-1 text-3xl font-semibold">{t.memberIds.map((id) => <li key={id}>{nameOf(state, id)}</li>)}</ul>
             </div>
@@ -64,7 +64,7 @@ export function AwardsStage({ state }: StepProps) {
           const visible = i >= n - reveal; // 꼴찌부터 한 팀씩 공개
           const first = i === 0 && visible;
           return (
-            <div key={t.id} className={`flex items-center justify-between rounded-3xl px-10 py-6 shadow-lg transition-all duration-700 ${visible ? 'text-white' : 'bg-neutral-200 text-transparent dark:bg-neutral-800'} ${first ? 'scale-105 ring-8 ring-yellow-300' : ''}`} style={visible ? { background: t.color } : undefined}>
+            <div key={t.id} className={`flex items-center justify-between rounded-3xl px-10 py-6 border-[3px] border-[var(--ink)] shadow-[0_6px_0_var(--ink)] transition-all duration-700 ${visible ? 'text-white' : 'bg-neutral-200 text-transparent dark:bg-neutral-800'} ${first ? 'scale-105 ring-8 ring-yellow-300' : ''}`} style={visible ? { background: t.color } : undefined}>
               <span className="text-6xl font-black">{visible ? `${MEDAL[i] ?? ''} ${i + 1}위` : `${i + 1}위`}</span>
               <span className="text-5xl font-bold">{visible ? t.name : '???'}</span>
               <span className="text-7xl font-black tabular-nums">{visible ? `${t.total}점` : ''}</span>

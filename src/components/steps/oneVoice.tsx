@@ -10,7 +10,7 @@ export function OneVoicePlayer({ state }: StepProps) {
     <div className="space-y-4 text-center">
       <p className="text-sm text-neutral-500">{ov.round + 1}라운드 · {ov.n}글자 단어를 한 글자씩 이어 말해요</p>
       {myOrder && idx !== undefined ? (
-        <div className="rounded-3xl bg-indigo-600 p-8 text-white shadow-lg">
+        <div className="rounded-3xl bg-[var(--primary)] p-8 text-white border-[3px] border-[var(--ink)] shadow-[0_6px_0_var(--ink)]">
           <div className="text-sm opacity-80">내 순서</div>
           <div className="text-7xl font-black">{idx + 1}번째</div>
           {ov.myLetter && <div className="mt-3 text-5xl font-black">&ldquo;{ov.myLetter}&rdquo;</div>}
@@ -39,7 +39,7 @@ export function OneVoiceStage({ state }: StepProps) {
           const order = ov.orders.find((o) => o.teamId === t.id)?.playerIds ?? [];
           const res = ov.results[t.id];
           return (
-            <div key={t.id} className="rounded-3xl p-6 text-white shadow-lg" style={{ background: t.color }}>
+            <div key={t.id} className="rounded-3xl p-6 text-white border-[3px] border-[var(--ink)] shadow-[0_6px_0_var(--ink)]" style={{ background: t.color }}>
               <div className="flex items-baseline justify-between"><span className="text-4xl font-black">{t.name}</span><span className="text-6xl font-black tabular-nums">{t.total}</span></div>
               <ol className="mt-4 space-y-2 text-3xl font-semibold">
                 {order.map((id, i) => <li key={id}>{i + 1}. {nameOf(state, id)}</li>)}

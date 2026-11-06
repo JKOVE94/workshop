@@ -8,7 +8,7 @@ export function SheepPlayer({ state }: StepProps) {
   return (
     <div className="space-y-4 text-center">
       <p className="text-neutral-600">&ldquo;내 양은 내 음성을 들으며…&rdquo; (요 10:27)</p>
-      <div className="rounded-3xl bg-indigo-600 p-6 text-white shadow-lg">
+      <div className="rounded-3xl bg-[var(--primary)] p-6 text-white border-[3px] border-[var(--ink)] shadow-[0_6px_0_var(--ink)]">
         <div className="text-2xl font-black">목자의 음성을 따라가요 🐑</div>
         <p className="mt-2 text-sm opacity-90">양이 가져온 카드의 뒷면 QR을<br />폰 카메라로 스캔하세요.<br /><b>걷기만 가능! 뛰지 마세요.</b></p>
       </div>

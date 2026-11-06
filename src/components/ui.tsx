@@ -29,9 +29,9 @@ export function Scoreboard({ teams, big, highlight }: { teams: PubTeam[]; big?: 
   return (
     <div className={`grid gap-3 ${big ? 'gap-6' : ''}`} style={{ gridTemplateColumns: `repeat(${teams.length}, minmax(0, 1fr))` }}>
       {teams.map((t) => (
-        <div key={t.id} className={`rounded-2xl text-center text-white shadow ${big ? 'p-8' : 'p-3'} ${highlight === t.id ? 'ring-4 ring-yellow-300' : ''}`} style={{ background: t.color }}>
-          <div className={big ? 'text-4xl font-bold' : 'text-sm font-semibold'}>{t.name}</div>
-          <div className={big ? 'mt-3 text-8xl font-black tabular-nums' : 'text-3xl font-black tabular-nums'}>{t.total}</div>
+        <div key={t.id} className={`border-[3px] border-[var(--ink)] text-center text-white ${big ? 'rounded-[2rem] p-8 shadow-[0_8px_0_var(--ink)]' : 'rounded-2xl p-3 shadow-[0_4px_0_var(--ink)]'} ${highlight === t.id ? 'ring-4 ring-yellow-300' : ''}`} style={{ background: t.color }}>
+          <div className={`font-display ${big ? 'text-5xl' : 'text-base'}`}>{t.name}</div>
+          <div className={`font-display tabular-nums ${big ? 'mt-3 text-9xl' : 'text-4xl'}`}>{t.total}</div>
         </div>
       ))}
     </div>
@@ -105,6 +105,6 @@ export function OfflineBadge({ offline }: { offline: boolean }) {
   return <div className="fixed left-2 top-2 z-50 rounded bg-red-600 px-2 py-1 text-xs font-bold text-white">연결 끊김 · 마지막 상태 표시 중</div>;
 }
 
-export const btn = 'rounded-lg bg-neutral-900 px-3 py-2 text-sm font-semibold text-white active:scale-95 disabled:opacity-40';
-export const btnGhost = 'rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-semibold text-neutral-800 active:scale-95 disabled:opacity-40';
-export const input = 'rounded-lg border border-neutral-300 bg-white px-3 py-2 text-base text-neutral-900';
+export const btn = 'btn-game';
+export const btnGhost = 'btn-game btn-ghost';
+export const input = 'field';
