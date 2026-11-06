@@ -38,7 +38,7 @@ export function buildState(s: Snapshot, role: Role, participantId: string | null
     gamePoints: rawNow.get(t.id) ?? 0,
     memberIds: membersOf(t.id),
   }));
-  const rankedTeams = step?.kind === 'part1_result' || step?.kind === 'awards' ? rank(teams) : teams;
+  const rankedTeams = step?.kind === 'awards' ? rank(teams) : teams;
 
   const me = participantId ? s.participants.find((p) => p.id === participantId) : null;
 
@@ -118,21 +118,15 @@ export function buildState(s: Snapshot, role: Role, participantId: string | null
 
   const shStep = s.steps.find((x) => x.kind === 'sheep_voice');
   if (shStep && (step?.kind === 'sheep_voice' || role === 'admin')) {
-    const round = Number(shStep.state.round ?? 0);
-    const cardById = new Map(s.cards.map((c) => [c.id, c]));
-    const scans = s.scans
-      .filter((x) => x.round === round)
-      .map((x) => ({ word: cardById.get(x.card_id)?.word ?? '?', teamId: x.team_id, ok: x.ok, at: x.created_at, round: x.round }));
+    const subs = s.scores.filter((e) => e.step_id === shStep.id && e.meta?.sheep && !e.meta?.reversal && !e.meta?.reversedBy);
     out.sheep = {
-      round,
-      cardCount: s.cards.length,
-      trapCount: s.cards.filter((c) => c.is_trap).length,
-      scans,
+      teams: s.teams.map((t) => ({
+        teamId: t.id,
+        ok: subs.filter((e) => e.team_id === t.id && e.meta.sheep === 'ok').length,
+        wrong: subs.filter((e) => e.team_id === t.id && e.meta.sheep === 'wrong').length,
+      })),
+      recent: subs.slice(-6).reverse().map((e) => ({ teamId: e.team_id, ok: e.meta.sheep === 'ok', at: e.created_at })),
     };
-    if (role === 'admin') {
-      const scanned = new Set(s.scans.filter((x) => x.round === round).map((x) => x.card_id));
-      out.sheep.adminCards = s.cards.map((c) => ({ id: c.id, word: c.word, isTrap: c.is_trap, scanned: scanned.has(c.id) }));
-    }
   }
 
   // 게임별 득점(raw)과 확정된 승리 팀

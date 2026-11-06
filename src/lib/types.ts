@@ -1,4 +1,4 @@
-export type StepKind = 'entry' | 'roster_close' | 'hum_team' | 'amen' | 'one_voice' | 'sheep_voice' | 'part1_result' | 'team_board' | 'awards';
+export type StepKind = 'entry' | 'roster_close' | 'hum_team' | 'amen' | 'one_voice' | 'sheep_voice' | 'team_board' | 'awards';
 
 export const STEP_KINDS: { kind: StepKind; label: string }[] = [
   { kind: 'entry', label: '입장' },
@@ -7,7 +7,6 @@ export const STEP_KINDS: { kind: StepKind; label: string }[] = [
   { kind: 'amen', label: '아멘 게임' },
   { kind: 'one_voice', label: '한마음과 한 입으로' },
   { kind: 'sheep_voice', label: '내 양은 내 음성을 들으며' },
-  { kind: 'part1_result', label: '1부 결과' },
   { kind: 'team_board', label: '팀 현황판' },
   { kind: 'awards', label: '시상식' },
 ];
@@ -36,8 +35,6 @@ export interface TraitRow {
   id: string; match_id: string; side: 'a' | 'b'; speaker_id: string | null;
   figure: string; trait: string; ok: boolean; dup: boolean; note: string; created_at: string;
 }
-export interface CardRow { id: string; event_id: string; word: string; is_trap: boolean; qr_token: string; sort: number }
-export interface ScanRow { id: string; card_id: string; team_id: string; step_id: string | null; round: number; ok: boolean; created_at: string }
 
 export interface EventRow { id: string; name: string; current_step_id: string | null; revision: number }
 
@@ -51,8 +48,6 @@ export interface Snapshot {
   songs: SongRow[];
   matches: MatchRow[];
   traits: TraitRow[];
-  cards: CardRow[];
-  scans: ScanRow[];
 }
 
 export type Role = 'player' | 'stage' | 'admin';
@@ -81,10 +76,9 @@ export interface PubOneVoice {
 }
 
 export interface PubSheep {
-  round: number;
-  cardCount: number; trapCount: number;
-  scans: { word: string; teamId: string; ok: boolean; at: string; round: number }[];
-  adminCards?: { id: string; word: string; isTrap: boolean; scanned: boolean }[];
+  /** 팀별 제출 결과 (현재 게임) */
+  teams: { teamId: string; ok: number; wrong: number }[];
+  recent: { teamId: string; ok: boolean; at: string }[];
 }
 
 export interface PublicState {

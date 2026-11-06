@@ -12,8 +12,6 @@ Next.js(App Router) + Supabase(Postgres) + Vercel.
 | `/play` | 참가자 폰 (현재 스텝 따라 자동 전환) |
 | `/stage` | 빔 화면 (읽기 전용, 인증 없음) |
 | `/admin` | 진행·점수 수동 입력·참가자 관리·봇·초기화 (비밀번호) |
-| `/admin/cards` | QR 단어 카드 인쇄 시트 |
-| `/s/[token]` | 카드 QR 스캔 결과 |
 
 ## 세팅
 
@@ -35,7 +33,7 @@ Next.js(App Router) + Supabase(Postgres) + Vercel.
 ## 미확정 규칙(config로 조정)
 
 `/admin` → 해당 스텝 → "스텝 설정(config JSON)": 아멘 승점·특성 중복 기준(`dupMode`)·실패 시 즉시 종료(`failEndsMatch`),
-한마음 단어 목록·점수·글자 공개(`letterMode`), 카드 정답/오답 점수. 허밍 곡은 스텝 화면에서 수정.
+한마음 단어 목록·점수·글자 공개(`letterMode`), 내 양은 내 음성을 들으며의 정답/함정 득점, 게임별 `winPoints`. 허밍 곡은 스텝 화면에서 수정.
 
 ## 당일 장애 대응
 

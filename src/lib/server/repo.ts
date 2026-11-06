@@ -21,7 +21,7 @@ export async function seedSteps(eventId: string) {
 
 export async function loadSnapshot(eventId: string): Promise<Snapshot> {
   const q = (t: string) => db().from(t).select('*').eq('event_id', eventId);
-  const [ev, steps, participants, teams, scores, songs, matches, cards] = await Promise.all([
+  const [ev, steps, participants, teams, scores, songs, matches] = await Promise.all([
     db().from('events').select('*').eq('id', eventId).single(),
     q('program_steps').order('sort'),
     q('participants').order('created_at'),
@@ -29,15 +29,12 @@ export async function loadSnapshot(eventId: string): Promise<Snapshot> {
     q('score_events').order('created_at'),
     q('hum_songs').order('sort'),
     q('amen_matches').order('sort'),
-    q('word_cards').order('sort'),
   ]);
   const teamIds = must(teams, 'teams').map((t: any) => t.id as string);
   const matchIds = must(matches, 'amen_matches').map((m: any) => m.id as string);
-  const cardIds = must(cards, 'word_cards').map((c: any) => c.id as string);
-  const [members, traits, scans] = await Promise.all([
+  const [members, traits] = await Promise.all([
     teamIds.length ? db().from('team_members').select('*').in('team_id', teamIds).order('sort') : Promise.resolve({ data: [], error: null }),
     matchIds.length ? db().from('amen_traits').select('*').in('match_id', matchIds).order('created_at') : Promise.resolve({ data: [], error: null }),
-    cardIds.length ? db().from('card_scans').select('*').in('card_id', cardIds).order('created_at') : Promise.resolve({ data: [], error: null }),
   ]);
   return {
     event: must(ev, 'event') as EventRow,
@@ -49,8 +46,6 @@ export async function loadSnapshot(eventId: string): Promise<Snapshot> {
     songs: must(songs, 'hum_songs'),
     matches: must(matches, 'amen_matches'),
     traits: must(traits as any, 'amen_traits'),
-    cards: must(cards, 'word_cards'),
-    scans: must(scans as any, 'card_scans'),
   } as Snapshot;
 }
 

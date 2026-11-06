@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
-import { Scoreboard, TeamTag, teamOf, type AdminProps, type StepProps } from '../ui';
+import { type AdminProps, type StepProps } from '../ui';
 
 export function EntryPlayer({ state }: StepProps) {
   return (
@@ -62,36 +62,6 @@ export function CloseStage({ state }: StepProps) {
           <span key={p.id} className="rounded-full bg-neutral-200 px-5 py-2 text-3xl font-semibold">{p.name}</span>
         ))}
       </div>
-    </div>
-  );
-}
-
-export function ResultPlayer({ state }: StepProps) {
-  const myTeam = teamOf(state, state.me?.teamId);
-  const idx = state.teams.findIndex((t) => t.id === myTeam?.id);
-  return (
-    <div className="space-y-4 text-center">
-      <p className="text-xl font-bold">1부 결과</p>
-      {myTeam && <p className="text-3xl font-black">{idx + 1}위 · <TeamTag team={myTeam} /> {myTeam.total}점</p>}
-      <Scoreboard teams={state.teams} />
-    </div>
-  );
-}
-
-export function ResultStage({ state }: StepProps) {
-  return (
-    <div className="space-y-10">
-      <h2 className="text-center text-6xl font-black">🏆 1부 결과</h2>
-      <div className="mx-auto max-w-4xl space-y-4">
-        {state.teams.map((t, i) => (
-          <div key={t.id} className="flex items-center justify-between rounded-3xl px-10 py-6 text-white border-[3px] border-[var(--ink)] shadow-[0_6px_0_var(--ink)]" style={{ background: t.color, opacity: i === 0 ? 1 : 0.9 }}>
-            <span className="text-6xl font-black">{i + 1}위</span>
-            <span className="text-5xl font-bold">{t.name}</span>
-            <span className="text-7xl font-black tabular-nums">{t.total}점</span>
-          </div>
-        ))}
-      </div>
-      <p className="text-center text-3xl text-neutral-500">동점이면 게임에서 얻은 득점 합이 앞섭니다</p>
     </div>
   );
 }

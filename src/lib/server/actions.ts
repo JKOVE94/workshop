@@ -5,7 +5,6 @@ import { smallestGroup, splitEvenly } from '../game/balance';
 import { leagueMatches, usedPlayers } from '../game/league';
 import { isDuplicateTrait, type DupMode } from '../game/traits';
 import { amenOutcome, DEFAULT_AMEN_POINTS } from '../game/scoring';
-import { newToken, parseCardWords } from '../game/cards';
 import { STEP_KINDS, type Snapshot, type StepKind, type StepRow } from '../types';
 
 export class ActionError extends Error {}
@@ -238,16 +237,19 @@ async function oneVoiceAction(eventId: string, snap: Snapshot, a: A) {
 
 async function sheepAction(eventId: string, snap: Snapshot, a: A) {
   const step = stepOf(snap, 'sheep_voice');
-  if (a.type === 'sheep_cards_set') {
-    const cards = parseCardWords(String(a.text ?? ''));
-    if (!cards.length) return fail('단어를 한 줄에 하나씩 입력하세요');
-    if (snap.scans.length && !a.force) return fail('이미 스캔 기록이 있습니다. 카드를 다시 만들면 기록이 지워집니다 (force 필요)');
-    must(await db().from('word_cards').delete().eq('event_id', eventId), 'cards 삭제');
-    must(await db().from('word_cards').insert(cards.map((c, i) => ({ event_id: eventId, word: c.word, is_trap: c.isTrap, qr_token: newToken(), sort: i }))), 'cards 생성');
-  } else if (a.type === 'sheep_next_round') {
-    await patchStep(step, { state: { round: Number(step.state.round ?? 0) + 1 } });
-  } else if (a.type === 'sheep_prev_round') {
-    await patchStep(step, { state: { round: Math.max(0, Number(step.state.round ?? 0) - 1) } });
+  const teamId = str(a.teamId, '팀');
+  if (!snap.teams.some((t) => t.id === teamId)) return fail('팀을 찾을 수 없습니다');
+  if (a.type === 'sheep_submit') {
+    // 양이 가져온 카드를 진행자가 확인하고 정답/함정을 기록한다
+    const ok = !!a.ok;
+    const pts = Number(ok ? step.config.correct ?? 1 : step.config.wrong ?? -1);
+    await addScore(eventId, teamId, step.id, pts, ok ? '카드 정답' : '카드 오답(함정)', { sheep: ok ? 'ok' : 'wrong' });
+  } else if (a.type === 'sheep_undo') {
+    // 해당 팀의 가장 최근 제출을 보정 행으로 취소
+    const last = [...snap.scores].reverse().find((e) => e.step_id === step.id && e.team_id === teamId && e.meta?.sheep && !e.meta?.reversal && !e.meta?.reversedBy);
+    if (!last) return fail('취소할 기록이 없습니다');
+    await addScore(eventId, teamId, step.id, -last.delta, `${last.reason} 취소`, { reversal: true, of: last.id });
+    must(await db().from('score_events').update({ meta: { ...last.meta, reversedBy: true } }).eq('id', last.id), 'undo mark');
   }
 }
 

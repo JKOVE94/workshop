@@ -2,7 +2,7 @@
 import type { ComponentType } from 'react';
 import type { StepKind } from '@/lib/types';
 import type { AdminProps, StepProps } from '../ui';
-import { ClosePlayer, CloseStage, EntryPlayer, EntryStage, PlainAdmin, ResultPlayer, ResultStage } from './basic';
+import { ClosePlayer, CloseStage, EntryPlayer, EntryStage, PlainAdmin } from './basic';
 import { HumAdmin, HumPlayer, HumStage } from './hum';
 import { AmenAdmin, AmenPlayer, AmenStage } from './amen';
 import { OneVoiceAdmin, OneVoicePlayer, OneVoiceStage } from './oneVoice';
@@ -25,5 +25,4 @@ export const STEP_MODULES: Record<StepKind, StepModule> = {
   sheep_voice: { Player: SheepPlayer, Stage: SheepStage, Admin: SheepAdmin },
   team_board: { Player: PlainBoardPlayer, Stage: BoardStage, Admin: PlainAdmin },
   awards: { Player: AwardsPlayer, Stage: AwardsStage, Admin: AwardsAdmin },
-  part1_result: { Player: ResultPlayer, Stage: ResultStage, Admin: PlainAdmin },
 };

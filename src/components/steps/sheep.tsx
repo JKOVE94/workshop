@@ -1,26 +1,19 @@
 'use client';
-import { useState } from 'react';
-import { Scoreboard, TeamTag, btn, btnGhost, input, teamOf, type AdminProps, type StepProps } from '../ui';
+import { Scoreboard, TeamTag, btn, btnGhost, teamOf, type AdminProps, type StepProps } from '../ui';
 
 export function SheepPlayer({ state }: StepProps) {
-  const sh = state.sheep;
   const team = teamOf(state, state.me?.teamId);
+  const mine = state.sheep?.teams.find((t) => t.teamId === team?.id);
   return (
     <div className="space-y-4 text-center">
-      <p className="text-neutral-700">&ldquo;내 양은 내 음성을 들으며…&rdquo; (요 10:27)</p>
-      <div className="rounded-3xl bg-[var(--primary)] p-6 text-white border-[3px] border-[var(--ink)] shadow-[0_6px_0_var(--ink)]">
-        <div className="text-2xl font-black">목자의 음성을 따라가요 🐑</div>
-        <p className="mt-2 text-sm opacity-90">양이 가져온 카드의 뒷면 QR을<br />폰 카메라로 스캔하세요.<br /><b>걷기만 가능! 뛰지 마세요.</b></p>
+      <div className="rounded-3xl border-[3px] border-[var(--ink)] bg-[var(--primary)] p-5 text-white shadow-[0_6px_0_var(--ink)]">
+        <div className="font-display text-2xl">목자의 음성을 따라가요 🐑</div>
+        <p className="mt-2 text-sm font-semibold opacity-90">양이 찾은 카드는 <b>진행자에게 제출</b>해요.<br /><b>걷기만! 뛰지 마세요.</b></p>
       </div>
-      {team && <p>우리 팀: <TeamTag team={team} /> {team.gamePoints}점</p>}
-      <Scoreboard teams={state.teams} mode="game" />
-      {sh && sh.scans.length > 0 && (
-        <ul className="space-y-1 text-left text-sm">
-          {sh.scans.slice(-5).reverse().map((s, i) => (
-            <li key={i} className={s.ok ? 'text-emerald-700' : 'text-red-600'}>{teamOf(state, s.teamId)?.name} · {s.word} {s.ok ? '⭕' : '❌'}</li>
-          ))}
-        </ul>
+      {team && (
+        <p className="font-bold"><TeamTag team={team} /> · 이번 게임 {team.gamePoints}점{mine ? ` (⭕ ${mine.ok} · ❌ ${mine.wrong})` : ''}</p>
       )}
+      <Scoreboard teams={state.teams} mode="game" />
     </div>
   );
 }
@@ -28,17 +21,18 @@ export function SheepPlayer({ state }: StepProps) {
 export function SheepStage({ state }: StepProps) {
   const sh = state.sheep;
   return (
-    <div className="space-y-10">
-      <h2 className="text-center text-5xl font-black">🐑 내 양은 내 음성을 들으며</h2>
-      <p className="text-center text-3xl text-neutral-500">&ldquo;내 양은 내 음성을 들으며 나는 그들을 알며 그들은 나를 따르느니라&rdquo; (요 10:27)</p>
+    <div className="space-y-8">
       <Scoreboard teams={state.teams} big mode="game" />
-      {sh && sh.scans.length > 0 && (
-        <div className="mx-auto flex max-w-5xl flex-wrap justify-center gap-3">
-          {sh.scans.slice(-8).reverse().map((s, i) => (
-            <span key={i} className={`rounded-full px-6 py-2 text-3xl font-bold text-white ${s.ok ? 'bg-emerald-600' : 'bg-red-600'}`}>
-              {teamOf(state, s.teamId)?.name} · {s.word} {s.ok ? '⭕' : '❌'}
-            </span>
-          ))}
+      {sh && (
+        <div className="mx-auto flex max-w-5xl flex-wrap justify-center gap-4">
+          {sh.teams.map((t) => {
+            const team = teamOf(state, t.teamId);
+            return (
+              <span key={t.teamId} className="rounded-full border-[3px] border-[var(--ink)] bg-white px-6 py-2 font-display text-3xl shadow-[0_4px_0_var(--ink)]">
+                {team?.name} · ⭕ {t.ok} · ❌ {t.wrong}
+              </span>
+            );
+          })}
         </div>
       )}
     </div>
@@ -47,33 +41,26 @@ export function SheepStage({ state }: StepProps) {
 
 export function SheepAdmin({ state, act }: AdminProps) {
   const sh = state.sheep;
-  const [text, setText] = useState('');
   if (!sh) return null;
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <b>스캔 라운드 {sh.round + 1}</b>
-        <button className={btnGhost} onClick={() => act({ type: 'sheep_prev_round' })}>◀</button>
-        <button className={btn} onClick={() => act({ type: 'sheep_next_round' })}>다음 라운드 ▶ (같은 카드 다시 스캔 가능)</button>
+    <div className="space-y-3">
+      <p className="text-sm font-semibold">양이 카드를 가져오면 정답/함정을 눌러 기록하세요. 득점: 정답 {state.step?.config.correct ?? 1} / 함정 {state.step?.config.wrong ?? -1}</p>
+      <div className="grid gap-3 sm:grid-cols-3">
+        {state.teams.map((t) => {
+          const c = sh.teams.find((x) => x.teamId === t.id);
+          return (
+            <div key={t.id} className="space-y-2 rounded-2xl border-[3px] border-[var(--ink)] bg-white p-3">
+              <div className="flex items-center justify-between font-bold"><TeamTag team={t} /><span className="font-display text-2xl tabular-nums">{t.gamePoints}점</span></div>
+              <div className="text-sm">⭕ {c?.ok ?? 0} · ❌ {c?.wrong ?? 0}</div>
+              <div className="grid grid-cols-2 gap-2">
+                <button className={`${btn} py-4 text-base`} onClick={() => act({ type: 'sheep_submit', teamId: t.id, ok: true })}>⭕ 정답</button>
+                <button className={`${btnGhost} py-4 text-base`} onClick={() => act({ type: 'sheep_submit', teamId: t.id, ok: false })}>❌ 함정</button>
+              </div>
+              <button className="w-full text-xs underline" onClick={() => act({ type: 'sheep_undo', teamId: t.id })}>↩ 마지막 기록 취소</button>
+            </div>
+          );
+        })}
       </div>
-      <div>
-        <label className="text-sm font-semibold">단어 카드 목록 (한 줄에 하나, 함정 단어는 앞에 *)</label>
-        <textarea className={`${input} mt-1 w-full font-mono`} rows={6} value={text} onChange={(e) => setText(e.target.value)} placeholder={'베드로\n다니엘\n*골리앗\n*가룟유다'} />
-        <div className="mt-2 flex flex-wrap gap-2">
-          <button className={btn} onClick={() => act({ type: 'sheep_cards_set', text, force: false })}>카드 만들기</button>
-          <button className={btnGhost} onClick={() => confirm('스캔 기록이 지워집니다. 계속할까요?') && act({ type: 'sheep_cards_set', text, force: true })}>덮어쓰기(기록 삭제)</button>
-          <a className={btnGhost} href="/admin/cards" target="_blank" rel="noreferrer">🖨 카드 시트 열기</a>
-        </div>
-        <p className="mt-1 text-xs text-neutral-500">현재 {sh.cardCount}장 (함정 {sh.trapCount}장). 인쇄 후 잘라서 카드 앞면에 단어, 뒷면에 QR이 오도록 붙이세요.</p>
-      </div>
-      {sh.adminCards && sh.adminCards.length > 0 && (
-        <div className="flex flex-wrap gap-1 text-xs">
-          {sh.adminCards.map((c) => (
-            <span key={c.id} className={`rounded px-2 py-1 ${c.isTrap ? 'bg-red-100 text-red-800' : 'bg-neutral-100 text-neutral-800'} ${c.scanned ? 'line-through opacity-50' : ''}`}>{c.word}</span>
-          ))}
-        </div>
-      )}
-      <p className="text-xs text-neutral-500">스캔 득점: 정답 {state.step?.config.correct ?? 1} / 오답 {state.step?.config.wrong ?? -1}. 득점이 가장 높은 팀이 게임 승리 팀이 됩니다 (아래 &lsquo;승리 확정&rsquo;).</p>
     </div>
   );
 }

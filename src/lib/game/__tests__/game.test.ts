@@ -4,7 +4,6 @@ import { leagueMatches, usedPlayers } from '../league';
 import { isDuplicateTrait } from '../traits';
 import { amenOutcome, rank } from '../scoring';
 import { letterCount, speakingOrder, pickWord, letters } from '../oneVoice';
-import { parseCardWords } from '../cards';
 
 describe('balance', () => {
   it('13명을 3팀으로 5/4/4', () => {
@@ -72,15 +71,5 @@ describe('oneVoice', () => {
     expect(pickWord(['베드로', '모세', '갈릴리'], 3, 1)).toBe('갈릴리');
     expect(pickWord(['모세'], 3, 0)).toBeNull();
     expect(letters('베 드로')).toEqual(['베', '드', '로']);
-  });
-});
-
-describe('cards', () => {
-  it('* 접두는 함정, 중복·빈줄 제거', () => {
-    expect(parseCardWords('베드로\n*골리앗\n\n베드로\n  *  가룟유다 ')).toEqual([
-      { word: '베드로', isTrap: false },
-      { word: '골리앗', isTrap: true },
-      { word: '가룟유다', isTrap: true },
-    ]);
   });
 });

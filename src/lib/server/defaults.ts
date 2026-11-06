@@ -36,6 +36,5 @@ export const DEFAULT_STEPS: { kind: StepKind; title: string; config: Record<stri
   },
   { kind: 'one_voice', title: '한마음과 한 입으로', config: { words: ONE_VOICE_WORDS, pointsPerSuccess: 1, letterMode: true, winPoints: 10 } },
   { kind: 'sheep_voice', title: '내 양은 내 음성을 들으며', config: { correct: 1, wrong: -1, winPoints: 20 } },
-  { kind: 'part1_result', title: '1부 결과', config: {} },
   { kind: 'awards', title: '시상식', config: {} },
 ];

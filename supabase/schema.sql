@@ -91,26 +91,6 @@ create table if not exists amen_traits (
   created_at timestamptz not null default now()
 );
 
-create table if not exists word_cards (
-  id uuid primary key default gen_random_uuid(),
-  event_id uuid not null references events(id) on delete cascade,
-  word text not null,
-  is_trap boolean not null default false,
-  qr_token text not null unique,
-  sort int not null default 0
-);
-
-create table if not exists card_scans (
-  id uuid primary key default gen_random_uuid(),
-  card_id uuid not null references word_cards(id) on delete cascade,
-  team_id uuid not null references teams(id) on delete cascade,
-  step_id uuid references program_steps(id) on delete set null,
-  round int not null default 0,
-  ok boolean not null,
-  created_at timestamptz not null default now(),
-  unique (card_id, round)
-);
-
 create index if not exists idx_steps_event on program_steps(event_id, sort);
 create index if not exists idx_score_event on score_events(event_id, created_at);
 create index if not exists idx_traits_match on amen_traits(match_id, created_at);
@@ -124,8 +104,6 @@ alter table score_events enable row level security;
 alter table hum_songs enable row level security;
 alter table amen_matches enable row level security;
 alter table amen_traits enable row level security;
-alter table word_cards enable row level security;
-alter table card_scans enable row level security;
 
 -- revision 원자적 증가 (폰/빔/관리자는 이 값 변화로 갱신 여부를 판단)
 create or replace function bump_revision(eid uuid) returns bigint

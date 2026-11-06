@@ -80,7 +80,7 @@ export const GUIDES: Partial<Record<StepKind, Guide>> = {
       { icon: '🧢🐑', text: '양: 고깔모자를 앞으로 쓰고' },
       { icon: '📢', text: '목자(팀원)가 단어를 외쳐요' },
       { icon: '🃏', text: '테이블에서 카드를 찾아' },
-      { icon: '📷', text: '뒷면 QR을 스캔!' },
+      { icon: '🙋', text: '진행자에게 제출!' },
       { icon: '⭕❌', text: '정답은 득점, 함정은 감점' },
       { icon: '🚶', text: '걷기만! 뛰지 않기' },
     ],

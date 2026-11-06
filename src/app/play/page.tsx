@@ -56,7 +56,7 @@ export default function PlayPage() {
         </>
       )}
 
-      {!inGame && kind !== 'part1_result' && kind !== 'awards' && state.teams.length > 0 && (
+      {!inGame && kind !== 'awards' && state.teams.length > 0 && (
         <section className="space-y-2"><h3 className="font-display text-sm opacity-60">점수판</h3><Scoreboard teams={state.teams} /></section>
       )}
     </main>
