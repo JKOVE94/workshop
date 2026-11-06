@@ -18,7 +18,7 @@ export default function StagePage() {
   const started = !!state.step?.state.started;
 
   return (
-    <main className="flex min-h-dvh flex-col gap-6 p-8">
+    <main className={`flex flex-col gap-6 p-8 ${kind && hasIntro && !started ? 'h-dvh gap-[2vh] overflow-hidden' : 'min-h-dvh'}`}>
       <OfflineBadge offline={offline} />
       <header className="flex items-center justify-between">
         <Brand big />
@@ -27,7 +27,7 @@ export default function StagePage() {
 
       {/* 활동마다 말씀+설명이 먼저: 관리자가 '활동 시작'을 누르기 전에는 소개 화면만 보인다 */}
       {kind && hasIntro && !started ? (
-        <div className="grid flex-1 place-items-center"><Intro kind={kind} variant="stage" /></div>
+        <div className="grid min-h-0 flex-1 place-items-center"><Intro kind={kind} variant="stage" /></div>
       ) : (
         <>
           {kind && hasVerse && <VerseCard kind={kind} variant="banner" />}

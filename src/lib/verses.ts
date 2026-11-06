@@ -17,7 +17,6 @@ export const VERSES: Partial<Record<StepKind, Verse>> = {
     tagline: '칭찬을 그대로 받아들이는 것이 존중의 시작이에요',
     passages: [
       { ref: '롬 12:10', text: '형제를 사랑하여 서로 우애하고 존경하기를 서로 먼저 하며' },
-      { ref: '빌 2:3', text: '아무 일에든지 다툼이나 허영으로 하지 말고 오직 겸손한 마음으로 각각 자기보다 남을 낫게 여기고' },
     ],
   },
   one_voice: {
