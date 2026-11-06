@@ -1,4 +1,6 @@
 'use client';
+import { useEffect, useState } from 'react';
+import QRCode from 'qrcode';
 import { Scoreboard, TeamTag, teamOf, type AdminProps, type StepProps } from '../ui';
 
 export function EntryPlayer({ state }: StepProps) {
@@ -11,10 +13,30 @@ export function EntryPlayer({ state }: StepProps) {
   );
 }
 
+/** 현재 접속 주소(origin)의 입장 페이지 QR. 클라이언트에서 생성해 배포 도메인이 바뀌어도 맞는다. */
+function JoinQr() {
+  const [src, setSrc] = useState('');
+  const [url, setUrl] = useState('');
+  useEffect(() => {
+    const u = `${window.location.origin}/`;
+    QRCode.toDataURL(u, { margin: 2, width: 480 }).then((d) => { setSrc(d); setUrl(u); }).catch(() => setUrl(u));
+  }, []);
+  return (
+    <div className="flex flex-col items-center gap-3">
+      {src && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt="입장 QR" className="h-80 w-80 rounded-2xl bg-white p-2 shadow-lg" />
+      )}
+      <p className="text-2xl text-neutral-500">{url.replace(/^https?:\/\//, '')}</p>
+    </div>
+  );
+}
+
 export function EntryStage({ state }: StepProps) {
   return (
     <div className="space-y-8 text-center">
       <h2 className="text-6xl font-black">QR로 입장하세요</h2>
+      <JoinQr />
       <p className="text-4xl text-neutral-500">이름만 입력하면 끝!</p>
       <p className="text-5xl font-bold">{state.participants.length}명 입장</p>
       <div className="mx-auto flex max-w-5xl flex-wrap justify-center gap-3">
